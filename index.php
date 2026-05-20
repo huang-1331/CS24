@@ -21,18 +21,18 @@ require 'header.php';
     </div>
 
     <div class="grid sm:grid-cols-3 gap-4 mt-12 text-left">
-        <div class="bg-white rounded-lg shadow p-5">
-            <h3 class="font-bold text-blue-900">🏬 매장 선택</h3>
-            <p class="text-slate-500 text-sm mt-1">가까운 CS24 매장을 골라 판매 상품을 확인합니다.</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-5">
-            <h3 class="font-bold text-blue-900">🛒 장바구니</h3>
-            <p class="text-slate-500 text-sm mt-1">원하는 상품을 담고 수량을 조절합니다.</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-5">
-            <h3 class="font-bold text-blue-900">📦 주문 &amp; 픽업</h3>
-            <p class="text-slate-500 text-sm mt-1">결제 후 발급되는 픽업 코드로 매장에서 수령합니다.</p>
-        </div>
+        <a href="login.php" class="block bg-white rounded-lg shadow p-6 hover:shadow-md hover:bg-blue-50 transition">
+            <h3 class="text-lg font-bold text-blue-900">🧊 나만의 냉장고</h3>
+            <p class="text-slate-500 text-sm mt-1">구매한 증정품을 안전하게 보관하고 필요할 때 꺼내 드세요.</p>
+        </a>
+        <a href="login.php" class="block bg-white rounded-lg shadow p-6 hover:shadow-md hover:bg-blue-50 transition">
+            <h3 class="text-lg font-bold text-blue-900">🔍 실시간 재고 찾기</h3>
+            <p class="text-slate-500 text-sm mt-1">우리 동네 CS24 매장의 상품 재고를 실시간으로 확인합니다.</p>
+        </a>
+        <a href="login.php" class="block bg-white rounded-lg shadow p-6 hover:shadow-md hover:bg-blue-50 transition">
+            <h3 class="text-lg font-bold text-blue-900">📦 주문 &amp; 픽업 내역</h3>
+            <p class="text-slate-500 text-sm mt-1">내가 주문한 상품의 픽업 코드와 과거 내역을 조회합니다.</p>
+        </a>
     </div>
 </div>
 <?php require 'footer.php'; ?>
