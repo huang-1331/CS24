@@ -19,6 +19,7 @@ $loggedIn  = isset($_SESSION['user_id']);
         <div class="flex items-center gap-3 text-sm">
             <?php if ($loggedIn): ?>
                 <a href="stores.php" class="hover:underline">매장</a>
+                <a href="fridge.php" class="hover:underline">냉장고</a>
                 <a href="orders.php" class="hover:underline">주문내역</a>
                 <span class="font-semibold">👤 <?= h($_SESSION['user_name']) ?>님</span>
                 <a href="logout.php" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded">로그아웃</a>
