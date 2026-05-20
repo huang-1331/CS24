@@ -1,7 +1,6 @@
 <?php
-// logout.php
+// logout.php - 세션 종료 후 홈으로 이동
 session_start();
-session_destroy(); // 모든 세션 정보 삭제 (도장 파기)
-
-echo "<script>alert('정상적으로 로그아웃 되었습니다.'); window.location.href='index.php';</script>";
-?>
+session_destroy();
+header('Location: index.php');
+exit();
