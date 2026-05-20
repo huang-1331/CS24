@@ -1,31 +1,45 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <title>CS24 - 로그인</title>
-    <style>
-        body { font-family: sans-serif; background: #1e3a8a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-box { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); width: 300px; text-align: center; }
-        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
-        button { width: 100%; padding: 10px; background: #f59e0b; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; color: white; font-size: 16px; margin-top: 10px; }
-        .links { margin-top: 20px; font-size: 14px; display: flex; justify-content: space-between; }
-        .links a { text-decoration: none; color: #1e3a8a; font-weight: bold; }
-    </style>
-</head>
-<body>
-    <div class="login-box">
-        <h2>🏪 CS24 로그인</h2>
-        <p>서비스 이용을 위해 로그인해 주세요.</p>
-        <hr>
-        <form action="login_process.php" method="POST">
-            <input type="text" name="login_id" placeholder="아이디" required>
-            <input type="password" name="login_pw" placeholder="비밀번호" required>
-            <button type="submit">로그인</button>
-        </form>
-        <div class="links">
-            <a href="index.php">← 홈으로</a>
-            <a href="signup.php">회원가입 하기 →</a>
+<?php
+require 'db.php';
+session_start();
+
+if (isset($_SESSION['user_id'])) {
+    header('Location: main.php');
+    exit();
+}
+
+$errorMessage = ($_GET['error'] ?? '') === 'invalid' ? '아이디 또는 비밀번호가 올바르지 않습니다.' : '';
+$noticeMessage = ($_GET['signup'] ?? '') === 'success' ? '회원가입이 완료되었습니다. 로그인해 주세요.' : '';
+
+$pageTitle = '로그인';
+require 'header.php';
+?>
+<div class="max-w-sm mx-auto bg-white rounded-lg shadow p-8">
+    <h2 class="text-2xl font-bold text-blue-900 text-center">🏪 로그인</h2>
+    <p class="text-slate-500 text-sm text-center mt-1">서비스 이용을 위해 로그인해 주세요.</p>
+
+    <?php if ($noticeMessage): ?>
+        <div class="mt-4 bg-green-100 text-green-700 text-sm rounded px-4 py-2"><?= h($noticeMessage) ?></div>
+    <?php endif; ?>
+    <?php if ($errorMessage): ?>
+        <div class="mt-4 bg-red-100 text-red-700 text-sm rounded px-4 py-2"><?= h($errorMessage) ?></div>
+    <?php endif; ?>
+
+    <form action="login_process.php" method="POST" class="mt-6 space-y-3">
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">아이디</label>
+            <input type="text" name="login_id" required
+                   class="w-full border border-slate-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
-    </div>
-</body>
-</html>
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">비밀번호</label>
+            <input type="password" name="login_pw" required
+                   class="w-full border border-slate-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <button type="submit"
+                class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 rounded mt-2">로그인</button>
+    </form>
+    <p class="text-center text-sm text-slate-500 mt-4">
+        계정이 없으신가요? <a href="signup.php" class="text-blue-700 font-semibold">회원가입</a>
+    </p>
+</div>
+<?php require 'footer.php'; ?>

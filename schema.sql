@@ -1,3 +1,20 @@
+-- CS24 편의점 데이터베이스 스키마
+-- 재임포트가 가능하도록 기존 테이블을 먼저 제거한다.
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS P_POINT_HISTORY;
+DROP TABLE IF EXISTS P_STORAGE;
+DROP TABLE IF EXISTS P_PAYMENT;
+DROP TABLE IF EXISTS P_DELIVERY;
+DROP TABLE IF EXISTS P_ORDER_DETAIL;
+DROP TABLE IF EXISTS P_ORDER;
+DROP TABLE IF EXISTS P_CART;
+DROP TABLE IF EXISTS P_STORE_INVENTORY;
+DROP TABLE IF EXISTS P_PRODUCT;
+DROP TABLE IF EXISTS P_CATEGORY;
+DROP TABLE IF EXISTS P_STORE;
+DROP TABLE IF EXISTS P_USER;
+SET FOREIGN_KEY_CHECKS = 1;
+
 CREATE TABLE P_USER (
   userId bigint PRIMARY KEY AUTO_INCREMENT,
   userLoginId varchar(50) UNIQUE NOT NULL,
@@ -11,7 +28,7 @@ CREATE TABLE P_USER (
   deletedAt datetime COMMENT 'soft delete',
   createdAt datetime NOT NULL DEFAULT (now()) COMMENT '생성 일시',
   updatedAt datetime NOT NULL DEFAULT (now()) COMMENT '수정 일시'
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE P_STORE (
   storeId bigint PRIMARY KEY AUTO_INCREMENT,
@@ -24,7 +41,7 @@ CREATE TABLE P_STORE (
   deletedAt datetime COMMENT 'soft delete',
   createdAt datetime NOT NULL DEFAULT (now()) COMMENT '생성 일시',
   updatedAt datetime NOT NULL DEFAULT (now()) COMMENT '수정 일시'
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE P_CATEGORY (
   categoryId bigint PRIMARY KEY AUTO_INCREMENT,
@@ -33,7 +50,7 @@ CREATE TABLE P_CATEGORY (
   categoryDisplayOrder int NOT NULL DEFAULT 0,
   createdAt datetime NOT NULL DEFAULT (now()) COMMENT '생성 일시',
   updatedAt datetime NOT NULL DEFAULT (now()) COMMENT '수정 일시'
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE P_PRODUCT (
   productId bigint PRIMARY KEY AUTO_INCREMENT,
@@ -48,7 +65,7 @@ CREATE TABLE P_PRODUCT (
   deletedAt datetime COMMENT 'soft delete',
   createdAt datetime NOT NULL DEFAULT (now()) COMMENT '생성 일시',
   updatedAt datetime NOT NULL DEFAULT (now()) COMMENT '수정 일시'
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE P_STORE_INVENTORY (
   inventoryId bigint PRIMARY KEY AUTO_INCREMENT,
@@ -57,7 +74,7 @@ CREATE TABLE P_STORE_INVENTORY (
   inventoryQuantity int NOT NULL DEFAULT 0,
   createdAt datetime NOT NULL DEFAULT (now()) COMMENT '생성 일시',
   updatedAt datetime NOT NULL DEFAULT (now()) COMMENT '수정 일시'
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE P_CART (
   cartId bigint PRIMARY KEY AUTO_INCREMENT,
@@ -67,7 +84,7 @@ CREATE TABLE P_CART (
   cartQuantity int NOT NULL DEFAULT 1,
   createdAt datetime NOT NULL DEFAULT (now()) COMMENT '생성 일시',
   updatedAt datetime NOT NULL DEFAULT (now()) COMMENT '수정 일시'
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE P_ORDER (
   orderId bigint PRIMARY KEY AUTO_INCREMENT,
@@ -83,7 +100,7 @@ CREATE TABLE P_ORDER (
   orderPaidAt datetime COMMENT '최종 결제 완료 시각 캐시',
   createdAt datetime NOT NULL DEFAULT (now()) COMMENT '생성 일시',
   updatedAt datetime NOT NULL DEFAULT (now()) COMMENT '수정 일시'
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE P_ORDER_DETAIL (
   orderDetailId bigint PRIMARY KEY AUTO_INCREMENT,
@@ -93,7 +110,7 @@ CREATE TABLE P_ORDER_DETAIL (
   orderDetailUnitPrice decimal(12,2) NOT NULL COMMENT '주문 시점 단가 스냅샷',
   orderDetailSubtotal decimal(12,2) NOT NULL,
   createdAt datetime NOT NULL DEFAULT (now()) COMMENT '생성 일시 (append-only)'
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE P_DELIVERY (
   deliveryId bigint PRIMARY KEY AUTO_INCREMENT,
@@ -110,7 +127,7 @@ CREATE TABLE P_DELIVERY (
   deliveryCompletedAt datetime,
   createdAt datetime NOT NULL DEFAULT (now()) COMMENT '생성 일시',
   updatedAt datetime NOT NULL DEFAULT (now()) COMMENT '수정 일시'
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE P_PAYMENT (
   paymentId bigint PRIMARY KEY AUTO_INCREMENT,
@@ -123,7 +140,7 @@ CREATE TABLE P_PAYMENT (
   paymentApprovedAt datetime,
   paymentFailReason varchar(255),
   createdAt datetime NOT NULL DEFAULT (now()) COMMENT '생성 일시 (append-only)'
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE P_STORAGE (
   storageId bigint PRIMARY KEY AUTO_INCREMENT,
@@ -136,7 +153,7 @@ CREATE TABLE P_STORAGE (
   storageRedeemedAt datetime,
   createdAt datetime NOT NULL DEFAULT (now()) COMMENT '생성 일시',
   updatedAt datetime NOT NULL DEFAULT (now()) COMMENT '수정 일시'
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE P_POINT_HISTORY (
   pointHistoryId bigint PRIMARY KEY AUTO_INCREMENT,
@@ -147,7 +164,7 @@ CREATE TABLE P_POINT_HISTORY (
   pointBalanceAfter int NOT NULL COMMENT '거래 직후 잔액 스냅샷',
   pointReason varchar(255),
   createdAt datetime NOT NULL DEFAULT (now()) COMMENT '생성 일시 (append-only)'
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 인덱스 설정
 CREATE UNIQUE INDEX idx_user_loginId ON P_USER (userLoginId);
@@ -183,7 +200,6 @@ CREATE INDEX idx_delivery_status ON P_DELIVERY (deliveryStatus);
 
 CREATE INDEX idx_payment_order ON P_PAYMENT (orderId);
 CREATE INDEX idx_payment_status ON P_PAYMENT (paymentStatus);
-CREATE UNIQUE INDEX idx_payment_txid ON P_PAYMENT (paymentTransactionId);
 
 CREATE INDEX idx_storage_user ON P_STORAGE (userId);
 CREATE INDEX idx_storage_status ON P_STORAGE (storageStatus);
@@ -226,7 +242,6 @@ ALTER TABLE P_ORDER ADD FOREIGN KEY (storeId) REFERENCES P_STORE (storeId) ON DE
 ALTER TABLE P_ORDER_DETAIL ADD FOREIGN KEY (orderId) REFERENCES P_ORDER (orderId) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE P_ORDER_DETAIL ADD FOREIGN KEY (productId) REFERENCES P_PRODUCT (productId) ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- [수정] 배송 테이블이 주문 테이블을 참조하도록 올바르게 수정
 ALTER TABLE P_DELIVERY ADD FOREIGN KEY (orderId) REFERENCES P_ORDER (orderId) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE P_PAYMENT ADD FOREIGN KEY (orderId) REFERENCES P_ORDER (orderId) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -234,7 +249,6 @@ ALTER TABLE P_PAYMENT ADD FOREIGN KEY (orderId) REFERENCES P_ORDER (orderId) ON 
 ALTER TABLE P_STORAGE ADD FOREIGN KEY (userId) REFERENCES P_USER (userId) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE P_STORAGE ADD FOREIGN KEY (productId) REFERENCES P_PRODUCT (productId) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE P_STORAGE ADD FOREIGN KEY (orderDetailId) REFERENCES P_ORDER_DETAIL (orderDetailId) ON DELETE SET NULL ON UPDATE CASCADE;
--- [삭제] 수량 데이터를 자기자신 ID에 매핑하던 엉터리 외래키 라인 제거 완료
 
 ALTER TABLE P_POINT_HISTORY ADD FOREIGN KEY (userId) REFERENCES P_USER (userId) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE P_POINT_HISTORY ADD FOREIGN KEY (orderId) REFERENCES P_ORDER (orderId) ON DELETE SET NULL ON UPDATE CASCADE;
