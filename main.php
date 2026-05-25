@@ -220,6 +220,69 @@ require 'header.php';
             c.innerHTML = '';
         }
     });
+
+    // === 휘발성 카트 이탈 가드 ===
+    // main.php 에서도 다른 페이지로 이동 시 카트를 영구 저장하지 않는다.
+    // 면제: checkout.php(주문하기), products.php(더 주문하기) — 카트 보존 필요.
+
+    let bypassUnloadGuard = false;
+
+    function cartHasItems() {
+        return document.querySelector('#cartPanelBody ul') !== null;
+    }
+
+    async function clearCartViaXhr() {
+        const sid = getCurrentCartStoreId();
+        if (!sid) return;
+        try {
+            await fetch('cart_process.php', {
+                method: 'POST',
+                body: new URLSearchParams({ action: 'clear', storeId: sid }),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+        } catch (err) {}
+    }
+
+    // in-page 링크 클릭 가드 (이벤트 위임)
+    document.addEventListener('click', async (e) => {
+        const link = e.target.closest && e.target.closest('a');
+        if (!link) return;
+        const href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+        if (href.includes('checkout.php') || href.includes('products.php')) {
+            bypassUnloadGuard = true;      // 주문하기·더 주문하기는 카트 보존 + 경고 없음
+            return;
+        }
+        if (!cartHasItems()) return;
+        e.preventDefault();
+        if (confirm('담은 항목은 저장되지 않습니다. 계속하시겠습니까?')) {
+            bypassUnloadGuard = true;      // 이미 처리하므로 브라우저 경고 중복 회피
+            await clearCartViaXhr();
+            window.location.href = href;
+        }
+    });
+
+    // 닫기/새로고침/뒤로가기: 브라우저 표준 확인창(메시지 커스텀 불가)
+    window.addEventListener('beforeunload', (e) => {
+        if (bypassUnloadGuard) return;
+        if (cartHasItems()) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
+    // 실제 이탈 시 best-effort clear
+    window.addEventListener('pagehide', () => {
+        if (bypassUnloadGuard) return;
+        if (cartHasItems()) {
+            const sid = getCurrentCartStoreId();
+            if (!sid) return;
+            navigator.sendBeacon(
+                'cart_process.php',
+                new URLSearchParams({ action: 'clear', storeId: sid })
+            );
+        }
+    });
     </script>
 <?php endif; ?>
 <?php require 'footer.php'; ?>
