@@ -37,8 +37,19 @@ $stmt = $conn->prepare(
 );
 $stmt->bind_param("i", $storeId);
 $stmt->execute();
-$products = $stmt->get_result();
+$all = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
+
+// 행사 상품(promotionType != NONE)을 위쪽 섹션으로 분리
+$promo   = [];
+$regular = [];
+foreach ($all as $p) {
+    if ($p['promotionType'] !== 'NONE') {
+        $promo[] = $p;
+    } else {
+        $regular[] = $p;
+    }
+}
 
 $promotionLabels = [
     'ONE_PLUS_ONE' => '1+1',
@@ -46,23 +57,10 @@ $promotionLabels = [
     'DISCOUNT'     => '할인',
 ];
 
-$pageTitle = $store['storeName'] . ' 상품';
-require 'header.php';
-?>
-<div class="flex items-center justify-between">
-    <div>
-        <h1 class="text-2xl font-bold text-blue-900"><?= h($store['storeName']) ?></h1>
-        <p class="text-slate-600 mt-1">상품을 장바구니에 담아 보세요.</p>
-    </div>
-    <a href="cart.php?storeId=<?= (int)$store['storeId'] ?>"
-       class="bg-blue-900 hover:bg-blue-800 text-white text-sm font-semibold px-4 py-2 rounded">🛒 장바구니</a>
-</div>
-
-<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-<?php while ($p = $products->fetch_assoc()):
-    $stock = (int)$p['inventoryQuantity'];
+function render_product_card($p, $storeId, $promotionLabels) {
+    $stock   = (int)$p['inventoryQuantity'];
     $soldOut = $stock <= 0;
-?>
+    ?>
     <div class="bg-white rounded-lg shadow p-5 flex flex-col">
         <div class="flex items-start justify-between">
             <span class="text-xs text-slate-400"><?= h($p['categoryName']) ?></span>
@@ -84,9 +82,9 @@ require 'header.php';
                 품절
             </button>
         <?php else: ?>
-            <form action="cart_process.php" method="POST" class="mt-3 flex gap-2">
+            <form action="cart_process.php" method="POST" class="mt-3 flex gap-2 add-to-cart-form">
                 <input type="hidden" name="action" value="add">
-                <input type="hidden" name="storeId" value="<?= (int)$store['storeId'] ?>">
+                <input type="hidden" name="storeId" value="<?= (int)$storeId ?>">
                 <input type="hidden" name="productId" value="<?= (int)$p['productId'] ?>">
                 <input type="number" name="quantity" value="1" min="1" max="<?= $stock ?>"
                        class="w-16 border border-slate-300 rounded px-2 py-1 text-sm">
@@ -97,6 +95,80 @@ require 'header.php';
             </form>
         <?php endif; ?>
     </div>
-<?php endwhile; ?>
+    <?php
+}
+
+$pageTitle = $store['storeName'] . ' 상품';
+require 'header.php';
+?>
+<div class="flex items-center justify-between">
+    <div>
+        <h1 class="text-2xl font-bold text-blue-900"><?= h($store['storeName']) ?></h1>
+        <p class="text-slate-600 mt-1">상품을 장바구니에 담아 보세요.</p>
+    </div>
+    <a href="cart.php?storeId=<?= (int)$store['storeId'] ?>"
+       class="bg-blue-900 hover:bg-blue-800 text-white text-sm font-semibold px-4 py-2 rounded">🛒 장바구니</a>
 </div>
+
+<?php if ($promo): ?>
+    <h2 class="text-lg font-bold text-amber-600 mt-6 mb-3">🔥 행사 중!</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <?php foreach ($promo as $p) render_product_card($p, $store['storeId'], $promotionLabels); ?>
+    </div>
+<?php endif; ?>
+
+<?php if ($regular): ?>
+    <h2 class="text-lg font-bold text-slate-700 mt-8 mb-3">일반 상품</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <?php foreach ($regular as $p) render_product_card($p, $store['storeId'], $promotionLabels); ?>
+    </div>
+<?php endif; ?>
+
+<style>
+#cartToast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #10b981;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 9999px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 50;
+    font-weight: 600;
+    pointer-events: none;
+    animation: cartToast 2.5s ease-out forwards;
+}
+@keyframes cartToast {
+    0%   { opacity: 0; transform: translate(-50%, 20px); }
+    10%  { opacity: 1; transform: translate(-50%, 0); }
+    80%  { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, 20px); }
+}
+</style>
+<script>
+document.querySelectorAll('.add-to-cart-form').forEach(form => {
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+            await fetch('cart_process.php', {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+        } catch (err) { return; }
+        showCartToast();
+    });
+});
+function showCartToast() {
+    document.getElementById('cartToast')?.remove();
+    const t = document.createElement('div');
+    t.id = 'cartToast';
+    t.textContent = '✓ 장바구니에 상품을 담았습니다.';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+}
+</script>
+
 <?php require 'footer.php'; ?>

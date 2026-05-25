@@ -53,5 +53,15 @@ if ($action === 'add') {
     $stmt->close();
 }
 
-header("Location: cart.php?storeId=$storeId");
+// AJAX 요청이면 본문 없이 204 — 페이지 이동 없음
+if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+    http_response_code(204);
+    exit();
+}
+
+// 비-AJAX 폴백: add 는 products.php 로 돌아가고, 수정/삭제는 기존대로 cart.php
+$target = ($action === 'add')
+    ? "products.php?storeId=$storeId&added=1"
+    : "cart.php?storeId=$storeId";
+header("Location: $target");
 exit();
