@@ -102,7 +102,6 @@ $pageTitle = $store['storeName'] . ' 상품';
 require 'header.php';
 ?>
 <div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
-    <!-- 좌측: 상품 -->
     <div>
         <h1 class="text-2xl font-bold text-blue-900"><?= h($store['storeName']) ?></h1>
         <p class="text-slate-600 mt-1">상품을 장바구니에 담아 보세요.</p>
@@ -122,20 +121,19 @@ require 'header.php';
         <?php endif; ?>
     </div>
 
-    <!-- 우측: 카트 사이드 패널 -->
-    <aside class="lg:sticky lg:top-4 h-fit bg-white rounded-lg shadow p-4">
-        <div class="flex items-center justify-between">
+    <aside class="lg:sticky lg:top-1/2 lg:-translate-y-1/2 max-h-[80vh] flex flex-col bg-white rounded-lg shadow p-4">
+        <div class="flex items-center justify-between flex-shrink-0">
             <h3 class="font-bold text-blue-900">🛒 장바구니</h3>
             <button id="cartClearBtn" type="button"
                     class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-600 px-2 py-1 rounded">
                 비우기
             </button>
         </div>
-        <div id="cartPanelBody" class="mt-3">
+        <div id="cartPanelBody" class="mt-3 flex-1 overflow-y-auto pr-1">
             <?php $storeId = (int)$store['storeId']; require 'cart_panel.php'; ?>
         </div>
         <a href="checkout.php?storeId=<?= (int)$store['storeId'] ?>"
-           class="block text-center mt-4 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded">
+           class="block text-center mt-4 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded flex-shrink-0">
             주문하기
         </a>
     </aside>
