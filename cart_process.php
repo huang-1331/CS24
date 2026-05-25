@@ -20,6 +20,24 @@ if ($action === 'add') {
     $productId = (int)($_POST['productId'] ?? 0);
     $quantity  = max(1, (int)($_POST['quantity'] ?? 1));
 
+    // 교차 매장 차단: 카트에 이미 다른 매장 항목이 있으면 거부 (한 번에 한 매장만 허용)
+    $check = $conn->prepare(
+        "SELECT 1 FROM P_CART WHERE userId = ? AND storeId <> ? LIMIT 1"
+    );
+    $check->bind_param("ii", $userId, $storeId);
+    $check->execute();
+    $hasOther = $check->get_result()->fetch_row() !== null;
+    $check->close();
+
+    if ($hasOther) {
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+            http_response_code(409);
+            exit();
+        }
+        header("Location: products.php?storeId=$storeId&conflict=1");
+        exit();
+    }
+
     // 같은 상품을 다시 담으면 수량을 합산 (UNIQUE: userId, storeId, productId).
     $stmt = $conn->prepare(
         "INSERT INTO P_CART (userId, storeId, productId, cartQuantity)

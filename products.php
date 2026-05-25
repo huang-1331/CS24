@@ -148,6 +148,21 @@ require 'header.php';
     80%  { opacity: 1; transform: translate(-50%, 0); }
     100% { opacity: 0; transform: translate(-50%, 20px); }
 }
+#crossStoreBanner {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ef4444;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 9999px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 50;
+    font-weight: 600;
+    pointer-events: none;
+    animation: cartToast 2.5s ease-out forwards;
+}
 </style>
 <script>
 const STORE_ID = <?= (int)$store['storeId'] ?>;
@@ -156,13 +171,16 @@ const STORE_ID = <?= (int)$store['storeId'] ?>;
 document.addEventListener('submit', async (e) => {
     if (e.target && e.target.classList.contains('add-to-cart-form')) {
         e.preventDefault();
+        let res;
         try {
-            await fetch('cart_process.php', {
+            res = await fetch('cart_process.php', {
                 method: 'POST',
                 body: new FormData(e.target),
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
         } catch (err) { return; }
+        if (res.status === 409) { showCrossStoreBanner(); return; }
+        if (!res.ok) return;
         showCartToast();
         refreshCartPanel();
     }
@@ -200,6 +218,15 @@ function showCartToast() {
     t.textContent = '✓ 장바구니에 상품을 담았습니다.';
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 2500);
+}
+
+function showCrossStoreBanner() {
+    document.getElementById('crossStoreBanner')?.remove();
+    const b = document.createElement('div');
+    b.id = 'crossStoreBanner';
+    b.textContent = '한 번에 하나의 점포에서만 주문할 수 있습니다.';
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 2500);
 }
 </script>
 
