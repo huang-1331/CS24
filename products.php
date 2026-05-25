@@ -179,7 +179,7 @@ document.addEventListener('submit', async (e) => {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
         } catch (err) { return; }
-        if (res.status === 409) { showCrossStoreBanner(); refreshCartPanel(); return; }
+        if (res.status === 409) { showCrossStoreBanner(); return; }
         if (!res.ok) return;
         showCartToast();
         refreshCartPanel();
@@ -189,10 +189,7 @@ document.addEventListener('submit', async (e) => {
 document.addEventListener('click', async (e) => {
     if (e.target && e.target.id === 'cartClearBtn') {
         if (!confirm('장바구니를 비우시겠습니까?')) return;
-        const cm = document.querySelector('#cartContainer a[href*="checkout.php"]')
-                       ?.getAttribute('href')?.match(/storeId=(\d+)/);
-        const clearStoreId = cm ? parseInt(cm[1], 10) : STORE_ID;
-        const body = new URLSearchParams({ action: 'clear', storeId: clearStoreId });
+        const body = new URLSearchParams({ action: 'clear', storeId: STORE_ID });
         try {
             await fetch('cart_process.php', {
                 method: 'POST',
@@ -208,7 +205,6 @@ async function refreshCartPanel() {
     try {
         const res = await fetch('cart_panel.php?storeId=' + STORE_ID);
         if (res.ok) {
-            // 모듈화 변화 반영: 최외각 컨테이너 전체를 교체하여 이벤트 및 스타일 동기화
             document.getElementById('cartContainer').innerHTML = await res.text();
         }
     } catch (err) {}
@@ -232,11 +228,32 @@ function showCrossStoreBanner() {
     setTimeout(() => b.remove(), 2500);
 }
 
+// === [신규 추가] stock.php 연동 실시간 자동 담기 로직 ===
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const autoAddId = urlParams.get('autoAddProductId');
+    
+    if (autoAddId) {
+        // 해당 productId 값을 hidden input으로 가진 form 요소를 정확히 매칭
+        const targetForm = document.querySelector(`.add-to-cart-form input[name="productId"][value="${autoAddId}"]`)?.closest('form');
+        
+        if (targetForm) {
+            // 수량 1개 설정 후 강제 서브밋 트리거 (기존의 AJAX submit 리스너가 받아 처리함)
+            const qtyInput = targetForm.querySelector('input[name="quantity"]');
+            if (qtyInput) qtyInput.value = "1";
+            
+            targetForm.requestSubmit();
+        }
+        
+        // 새로고침 시 무한 추가 현상 방지를 위해 URL 주소창에서 파라미터 깔끔하게 제거
+        urlParams.delete('autoAddProductId');
+        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.history.replaceState({}, document.title, newUrl);
+    }
+});
+
 // === 휘발성 카트 이탈 가드 ===
 // products.php 에서 다른 페이지로 이동 시 카트를 영구 저장하지 않는다.
-// 면제 대상: checkout.php(주문하기) — 카트는 주문 처리에 필요.
-
-let bypassUnloadGuard = false;
 
 function cartHasItems() {
     return document.querySelector('#cartPanelBody ul') !== null;
@@ -252,28 +269,23 @@ async function clearCartViaXhr() {
     } catch (err) {}
 }
 
-// in-page 링크 클릭 가드 (이벤트 위임)
+// in-page 링크 클릭 가드 (이벤트 위임). checkout.php 이동은 통과.
 document.addEventListener('click', async (e) => {
     const link = e.target.closest && e.target.closest('a');
     if (!link) return;
     const href = link.getAttribute('href');
     if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
-    if (href.includes('checkout.php')) {
-        bypassUnloadGuard = true;          // 주문하기는 카트 보존 + 경고 없음
-        return;
-    }
+    if (href.includes('checkout.php')) return;
     if (!cartHasItems()) return;
     e.preventDefault();
     if (confirm('담은 항목은 저장되지 않습니다. 계속하시겠습니까?')) {
-        bypassUnloadGuard = true;          // 이미 처리하므로 브라우저 경고 중복 회피
         await clearCartViaXhr();
         window.location.href = href;
     }
 });
 
-// 닫기/새로고침/뒤로가기: 브라우저 표준 확인창(메시지 커스텀 불가)
+// 닫기/새로고침/뒤로가기: 브라우저 표준 확인창
 window.addEventListener('beforeunload', (e) => {
-    if (bypassUnloadGuard) return;
     if (cartHasItems()) {
         e.preventDefault();
         e.returnValue = '';
@@ -282,14 +294,10 @@ window.addEventListener('beforeunload', (e) => {
 
 // 실제 이탈 시 best-effort clear
 window.addEventListener('pagehide', () => {
-    if (bypassUnloadGuard) return;
     if (cartHasItems()) {
-        const bm = document.querySelector('#cartContainer a[href*="checkout.php"]')
-                       ?.getAttribute('href')?.match(/storeId=(\d+)/);
-        const beaconStoreId = bm ? parseInt(bm[1], 10) : STORE_ID;
         navigator.sendBeacon(
             'cart_process.php',
-            new URLSearchParams({ action: 'clear', storeId: beaconStoreId })
+            new URLSearchParams({ action: 'clear', storeId: STORE_ID })
         );
     }
 });

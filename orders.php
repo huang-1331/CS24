@@ -25,7 +25,7 @@ if ($orderId > 0) {
     // 주문 단건 조회 (본인 주문만)
     $stmt = $conn->prepare(
         "SELECT o.orderId, o.orderTotalAmount, o.orderStatus, o.orderPickupCode,
-                o.orderPaidAt, o.createdAt, s.storeName
+                o.orderIsDelivery, o.orderPaidAt, o.createdAt, s.storeName
          FROM P_ORDER o
          JOIN P_STORE s ON s.storeId = o.storeId
          WHERE o.orderId = ? AND o.userId = ?"
@@ -77,12 +77,19 @@ require 'header.php';
             </div>
             <p class="text-slate-500 text-sm mt-1"><?= h($order['storeName']) ?> &middot; <?= h($order['createdAt']) ?></p>
 
-            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4 text-center">
-                <p class="text-sm text-amber-700">픽업 코드</p>
-                <p class="text-3xl font-bold tracking-widest text-amber-800 mt-1">
-                    <?= h($order['orderPickupCode']) ?>
-                </p>
-            </div>
+            <?php if ($order['orderIsDelivery']): ?>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4 text-center">
+                    <p class="text-sm text-blue-700">주문 유형</p>
+                    <p class="text-2xl font-bold text-blue-800 mt-1">🛵 배달 주문</p>
+                </div>
+            <?php else: ?>
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4 text-center">
+                    <p class="text-sm text-amber-700">픽업 코드</p>
+                    <p class="text-3xl font-bold tracking-widest text-amber-800 mt-1">
+                        <?= h($order['orderPickupCode']) ?>
+                    </p>
+                </div>
+            <?php endif; ?>
 
             <div class="mt-5 divide-y border-t border-b">
                 <?php foreach ($details as $d): ?>
@@ -113,7 +120,7 @@ require 'header.php';
     <?php
     $stmt = $conn->prepare(
         "SELECT o.orderId, o.orderTotalAmount, o.orderStatus, o.orderPickupCode,
-                o.createdAt, s.storeName
+                o.orderIsDelivery, o.createdAt, s.storeName
          FROM P_ORDER o
          JOIN P_STORE s ON s.storeId = o.storeId
          WHERE o.userId = ?
@@ -144,7 +151,11 @@ require 'header.php';
                 </div>
                 <p class="text-sm text-slate-500 mt-1"><?= h($o['storeName']) ?> &middot; <?= h($o['createdAt']) ?></p>
                 <div class="flex items-center justify-between mt-2">
-                    <span class="text-sm text-slate-500">픽업코드 <span class="font-semibold tracking-wider text-amber-700"><?= h($o['orderPickupCode']) ?></span></span>
+                    <?php if ($o['orderIsDelivery']): ?>
+                        <span class="text-sm text-blue-700 font-semibold">🛵 배달</span>
+                    <?php else: ?>
+                        <span class="text-sm text-slate-500">픽업코드 <span class="font-semibold tracking-wider text-amber-700"><?= h($o['orderPickupCode']) ?></span></span>
+                    <?php endif; ?>
                     <span class="font-bold text-blue-900"><?= number_format((float)$o['orderTotalAmount']) ?>원</span>
                 </div>
             </a>

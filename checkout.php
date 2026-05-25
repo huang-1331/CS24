@@ -49,7 +49,19 @@ if (!$store) {
 
 // ---- 주문 확정 처리 (트랜잭션) ----
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $bonusOptIn = array_map('intval', $_POST['store_bonus'] ?? []);
+    $bonusOptIn     = array_map('intval', $_POST['store_bonus'] ?? []);
+    $isDelivery     = (($_POST['order_type'] ?? 'pickup') === 'delivery');
+    $recipientName  = trim($_POST['recipient_name']  ?? '');
+    $recipientPhone = trim($_POST['recipient_phone'] ?? '');
+    $deliveryAddr   = trim($_POST['delivery_addr']   ?? '');
+    $deliveryDetail = trim($_POST['delivery_detail'] ?? '');
+    $deliveryMemo   = trim($_POST['delivery_memo']   ?? '');
+
+    if ($isDelivery && ($recipientName === '' || $recipientPhone === '' || $deliveryAddr === '')) {
+        $error = '배달 정보(받으실 분·연락처·주소)를 모두 입력해 주세요.';
+    }
+
+    if (!$error) {
     try {
         $conn->begin_transaction();
 
@@ -80,15 +92,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $total += $line['cartQuantity'] * $line['productPrice'];
         }
 
-        // 4. 픽업코드 + 5. 주문(P_ORDER) 생성
-        $pickupCode = generate_pickup_code();
-        $stmt = $conn->prepare(
-            "INSERT INTO P_ORDER
-               (userId, storeId, orderTotalAmount, orderPaymentMethod, orderStatus,
-                orderIsDelivery, orderPickupCode, orderPaidAt)
-             VALUES (?, ?, ?, 'CARD', 'PAID', 0, ?, NOW())"
-        );
-        $stmt->bind_param("iids", $userId, $storeId, $total, $pickupCode);
+        // 4. 주문 유형 분기 + 5. 주문(P_ORDER) 생성
+        if ($isDelivery) {
+            $stmt = $conn->prepare(
+                "INSERT INTO P_ORDER
+                   (userId, storeId, orderTotalAmount, orderPaymentMethod, orderStatus,
+                    orderIsDelivery, orderPaidAt)
+                 VALUES (?, ?, ?, 'CARD', 'PAID', 1, NOW())"
+            );
+            $stmt->bind_param("iid", $userId, $storeId, $total);
+        } else {
+            $pickupCode = generate_pickup_code();
+            $stmt = $conn->prepare(
+                "INSERT INTO P_ORDER
+                   (userId, storeId, orderTotalAmount, orderPaymentMethod, orderStatus,
+                    orderIsDelivery, orderPickupCode, orderPaidAt)
+                 VALUES (?, ?, ?, 'CARD', 'PAID', 0, ?, NOW())"
+            );
+            $stmt->bind_param("iids", $userId, $storeId, $total, $pickupCode);
+        }
         $stmt->execute();
         $orderId = $conn->insert_id;
         $stmt->close();
@@ -137,7 +159,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $invStmt->close();
         $storageStmt->close();
 
-        // 8. mock 결제 기록 (실제 PG 연동 없이 승인 처리)
+        // 8. 배달 주문이면 P_DELIVERY에 배송 정보 기록
+        if ($isDelivery) {
+            $delStmt = $conn->prepare(
+                "INSERT INTO P_DELIVERY
+                   (orderId, deliveryRecipientName, deliveryPhoneNumber,
+                    deliveryAddress, deliveryAddressDetail, deliveryRequestMemo)
+                 VALUES (?, ?, ?, ?, ?, ?)"
+            );
+            $delStmt->bind_param("isssss", $orderId, $recipientName, $recipientPhone,
+                                  $deliveryAddr, $deliveryDetail, $deliveryMemo);
+            $delStmt->execute();
+            $delStmt->close();
+        }
+
+        // 9. mock 결제 기록 (실제 PG 연동 없이 승인 처리)
         $txId = 'MOCK-' . strtoupper(bin2hex(random_bytes(6)));
         $stmt = $conn->prepare(
             "INSERT INTO P_PAYMENT
@@ -149,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $stmt->close();
 
-        // 9. 해당 매장 장바구니 비우기
+        // 10. 해당 매장 장바구니 비우기
         $stmt = $conn->prepare("DELETE FROM P_CART WHERE userId = ? AND storeId = ?");
         $stmt->bind_param("ii", $userId, $storeId);
         $stmt->execute();
@@ -162,6 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn->rollback();
         $error = $e->getMessage();
     }
+    } // end if (!$error)
 }
 
 // ---- 주문 확인 화면용 장바구니 요약 ----
@@ -203,6 +240,69 @@ require 'header.php';
     <form action="checkout.php" method="POST">
         <input type="hidden" name="storeId" value="<?= (int)$store['storeId'] ?>">
 
+        <!-- 주문 방식 선택 -->
+        <div class="bg-white rounded-lg shadow mt-6 p-5">
+            <p class="font-semibold text-slate-700 mb-3">주문 방식</p>
+            <div class="flex gap-8">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="order_type" value="pickup"
+                           <?= (($_POST['order_type'] ?? 'pickup') !== 'delivery') ? 'checked' : '' ?>
+                           class="accent-amber-500">
+                    <span class="text-sm font-medium text-slate-700">📦 픽업 (매장 수령)</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="order_type" value="delivery"
+                           <?= (($_POST['order_type'] ?? '') === 'delivery') ? 'checked' : '' ?>
+                           class="accent-amber-500">
+                    <span class="text-sm font-medium text-slate-700">🛵 배달</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 배달 정보 폼 (배달 선택 시 표시) -->
+        <div id="deliveryForm" class="bg-white rounded-lg shadow mt-4 p-5 space-y-3
+                                      <?= (($_POST['order_type'] ?? '') !== 'delivery') ? 'hidden' : '' ?>">
+            <h3 class="font-semibold text-slate-700">배달 정보</h3>
+            <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1">받으실 분</label>
+                <input type="text" name="recipient_name" id="recipientName"
+                       value="<?= h($_POST['recipient_name'] ?? $_SESSION['user_name']) ?>"
+                       class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1">연락처</label>
+                <input type="text" name="recipient_phone" id="recipientPhone"
+                       value="<?= h($_POST['recipient_phone'] ?? '') ?>"
+                       placeholder="010-XXXX-XXXX"
+                       class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1">주소</label>
+                <input type="text" name="delivery_addr" id="deliveryAddr"
+                       value="<?= h($_POST['delivery_addr'] ?? '') ?>"
+                       placeholder="배달 주소를 입력하세요"
+                       class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1">
+                    상세주소 <span class="text-slate-400 font-normal">(선택)</span>
+                </label>
+                <input type="text" name="delivery_detail"
+                       value="<?= h($_POST['delivery_detail'] ?? '') ?>"
+                       placeholder="동·호수 등"
+                       class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1">
+                    요청사항 <span class="text-slate-400 font-normal">(선택)</span>
+                </label>
+                <input type="text" name="delivery_memo"
+                       value="<?= h($_POST['delivery_memo'] ?? '') ?>"
+                       placeholder="예: 문 앞에 놓아주세요"
+                       class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
+
         <div class="bg-white rounded-lg shadow mt-6 divide-y">
             <?php foreach ($lines as $line):
                 $subtotal = $line['cartQuantity'] * $line['productPrice'];
@@ -243,4 +343,23 @@ require 'header.php';
     <a href="products.php?storeId=<?= (int)$store['storeId'] ?>"
        class="block text-center text-sm text-slate-500 mt-3 hover:underline">← 상품 보기로 돌아가기</a>
 <?php endif; ?>
+<script>
+(function () {
+    const form      = document.getElementById('deliveryForm');
+    const radios    = document.querySelectorAll('input[name="order_type"]');
+    const required  = ['recipientName', 'recipientPhone', 'deliveryAddr'];
+
+    function sync() {
+        const isDelivery = document.querySelector('input[name="order_type"]:checked')?.value === 'delivery';
+        form.classList.toggle('hidden', !isDelivery);
+        required.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.required = isDelivery;
+        });
+    }
+
+    radios.forEach(r => r.addEventListener('change', sync));
+    sync(); // 초기 상태 적용 (유효성 오류로 폼 재표시 시 라디오 상태 반영)
+})();
+</script>
 <?php require 'footer.php'; ?>
