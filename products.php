@@ -179,7 +179,7 @@ document.addEventListener('submit', async (e) => {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
         } catch (err) { return; }
-        if (res.status === 409) { showCrossStoreBanner(); return; }
+        if (res.status === 409) { showCrossStoreBanner(); refreshCartPanel(); return; }
         if (!res.ok) return;
         showCartToast();
         refreshCartPanel();
@@ -189,7 +189,10 @@ document.addEventListener('submit', async (e) => {
 document.addEventListener('click', async (e) => {
     if (e.target && e.target.id === 'cartClearBtn') {
         if (!confirm('장바구니를 비우시겠습니까?')) return;
-        const body = new URLSearchParams({ action: 'clear', storeId: STORE_ID });
+        const cm = document.querySelector('#cartContainer a[href*="checkout.php"]')
+                       ?.getAttribute('href')?.match(/storeId=(\d+)/);
+        const clearStoreId = cm ? parseInt(cm[1], 10) : STORE_ID;
+        const body = new URLSearchParams({ action: 'clear', storeId: clearStoreId });
         try {
             await fetch('cart_process.php', {
                 method: 'POST',
@@ -281,9 +284,12 @@ window.addEventListener('beforeunload', (e) => {
 window.addEventListener('pagehide', () => {
     if (bypassUnloadGuard) return;
     if (cartHasItems()) {
+        const bm = document.querySelector('#cartContainer a[href*="checkout.php"]')
+                       ?.getAttribute('href')?.match(/storeId=(\d+)/);
+        const beaconStoreId = bm ? parseInt(bm[1], 10) : STORE_ID;
         navigator.sendBeacon(
             'cart_process.php',
-            new URLSearchParams({ action: 'clear', storeId: STORE_ID })
+            new URLSearchParams({ action: 'clear', storeId: beaconStoreId })
         );
     }
 });

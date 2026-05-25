@@ -195,7 +195,11 @@ require 'header.php';
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
         } catch (err) { return; }
-        if (res.status === 409) { showCrossStoreBanner(); return; }
+        if (res.status === 409) {
+            showCrossStoreBanner();
+            await refreshCartPanel(storeId);
+            return;
+        }
         if (!res.ok) return;
 
         await refreshCartPanel(storeId);
@@ -249,8 +253,22 @@ require 'header.php';
         if (!link) return;
         const href = link.getAttribute('href');
         if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
-        if (href.includes('checkout.php') || href.includes('products.php')) {
-            bypassUnloadGuard = true;      // 주문하기·더 주문하기는 카트 보존 + 경고 없음
+        if (href.includes('checkout.php')) {
+            bypassUnloadGuard = true;
+            return;
+        }
+        if (href.includes('products.php')) {
+            const cartStoreId = getCurrentCartStoreId();
+            if (cartStoreId !== null) {
+                const m = href.match(/storeId=(\d+)/);
+                const targetStoreId = m ? parseInt(m[1], 10) : null;
+                if (targetStoreId !== null && targetStoreId !== cartStoreId) {
+                    e.preventDefault();
+                    showCrossStoreBanner();
+                    return;
+                }
+            }
+            bypassUnloadGuard = true;
             return;
         }
         if (!cartHasItems()) return;

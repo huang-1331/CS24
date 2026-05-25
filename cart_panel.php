@@ -17,16 +17,19 @@ if (!isset($storeId)) {
 }
 
 $stmt = $conn->prepare(
-    "SELECT c.cartQuantity, p.productName, p.productPrice
+    "SELECT c.cartQuantity, c.storeId, p.productName, p.productPrice
      FROM P_CART c
      JOIN P_PRODUCT p ON p.productId = c.productId
-     WHERE c.userId = ? AND c.storeId = ?
+     WHERE c.userId = ?
      ORDER BY p.productName"
 );
-$stmt->bind_param("ii", $userId, $storeId);
+$stmt->bind_param("i", $userId);
 $stmt->execute();
 $items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
+
+// 실제 카트에 담긴 매장 기준으로 checkout/clear 링크 생성 (빈 카트면 요청된 storeId 사용)
+$effectiveStoreId = !empty($items) ? (int)$items[0]['storeId'] : (int)$storeId;
 
 $total = 0;
 foreach ($items as $it) {
@@ -72,7 +75,7 @@ foreach ($items as $it) {
         <?php endif; ?>
     </div>
     
-    <a href="checkout.php?storeId=<?= (int)$storeId ?>"
+    <a href="checkout.php?storeId=<?= $effectiveStoreId ?>"
        class="block text-center mt-4 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded flex-shrink-0">
         주문하기
     </a>
