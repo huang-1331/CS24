@@ -9,15 +9,6 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = (int)$_SESSION['user_id'];
 
-// 카트의 현재 매장 — 한 번에 한 매장만 허용되므로 한 행만 확인하면 됨
-$stmt = $conn->prepare("SELECT storeId FROM P_CART WHERE userId = ? LIMIT 1");
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$row = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-$cartStoreId = $row ? (int)$row['storeId'] : 0;
-$hasCart     = $cartStoreId > 0;
-
 // 매장별 행사 상품 조회 (재고 있는 것만)
 $res = $conn->query(
     "SELECT s.storeId, s.storeName,
@@ -60,68 +51,72 @@ require 'header.php';
 <p class="text-slate-600 mt-1"><?= h($_SESSION['user_name']) ?>님, CS24에 오신 것을 환영합니다.</p>
 
 <div class="grid sm:grid-cols-2 gap-4 mt-8">
-    <a href="fridge.php" class="block bg-white rounded-lg shadow p-6 hover:shadow-md hover:bg-blue-50 transition">
+    <a href="fridge.php" class="block bg-white rounded-lg shadow p-8 hover:shadow-md hover:bg-blue-50 transition">
         <h3 class="text-lg font-bold text-blue-900">🧊 나만의 냉장고</h3>
         <p class="text-slate-500 text-sm mt-1">구매한 증정품을 안전하게 보관하고 필요할 때 꺼내 드세요.</p>
     </a>
-    <a href="stock.php" class="block bg-white rounded-lg shadow p-6 hover:shadow-md hover:bg-blue-50 transition">
+    <a href="stock.php" class="block bg-white rounded-lg shadow p-8 hover:shadow-md hover:bg-blue-50 transition">
         <h3 class="text-lg font-bold text-blue-900">🔍 실시간 재고 찾기</h3>
         <p class="text-slate-500 text-sm mt-1">우리 동네 CS24 매장의 상품 재고를 실시간으로 확인합니다.</p>
     </a>
-    <a href="orders.php" class="block bg-white rounded-lg shadow p-6 hover:shadow-md hover:bg-blue-50 transition">
+    <a href="orders.php" class="block bg-white rounded-lg shadow p-8 hover:shadow-md hover:bg-blue-50 transition">
         <h3 class="text-lg font-bold text-blue-900">📦 주문 &amp; 픽업 내역</h3>
         <p class="text-slate-500 text-sm mt-1">내가 주문한 상품의 픽업 코드와 과거 내역을 조회합니다.</p>
     </a>
-    <a href="stores.php" class="block bg-white rounded-lg shadow p-6 hover:shadow-md hover:bg-blue-50 transition">
+    <a href="stores.php" class="block bg-white rounded-lg shadow p-8 hover:shadow-md hover:bg-blue-50 transition">
         <h3 class="text-lg font-bold text-blue-900">🧺 주문하기</h3>
         <p class="text-slate-500 text-sm mt-1">편의점 상품을 원격으로 주문합니다.</p>
     </a>
 </div>
 
 <?php if ($storeGroups): ?>
-    <h2 class="text-2xl text-center font-bold text-blue-900 mt-12 mb-6">🔥 특가 세일 상품</h2>
+    <h2 class="text-2xl text-center font-bold text-blue-900 mt-20 mb-6">🔥 특가 세일 상품</h2>
 
-    <div id="promoLayout" class="<?= $hasCart ? 'has-cart' : '' ?>">
-        <div>
-            <?php foreach ($storeGroups as $g): ?>
-                <div class="mb-8">
-                    <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
-                        <h3 class="text-lg font-bold text-slate-700"><?= h($g['storeName']) ?></h3>
-                        <a href="products.php?storeId=<?= (int)$g['storeId'] ?>"
-                           class="text-sm text-blue-700 hover:underline">더 주문하기</a>
-                    </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        <?php foreach ($g['products'] as $p): ?>
-                            <div class="bg-white rounded-lg shadow p-4 flex flex-col">
-                                <span class="text-xs bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded w-fit">
-                                    <?= h($promotionLabels[$p['promotionType']] ?? '행사') ?>
-                                </span>
-                                <h4 class="font-bold text-slate-800 mt-2 flex-grow"><?= h($p['productName']) ?></h4>
-                                <p class="text-blue-900 font-bold mt-1"><?= number_format((float)$p['productPrice']) ?>원</p>
-                                <button type="button"
-                                        class="promo-add-btn mt-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold py-2 rounded"
-                                        data-store-id="<?= (int)$g['storeId'] ?>"
-                                        data-product-id="<?= (int)$p['productId'] ?>">
-                                    장바구니에 담기
-                                </button>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
+    <div id="promoLayout">
+        <?php foreach ($storeGroups as $g): ?>
+            <div class="mb-8">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                    <h3 class="text-lg font-bold text-slate-700"><?= h($g['storeName']) ?></h3>
+                    <a href="products.php?storeId=<?= (int)$g['storeId'] ?>"
+                       class="text-sm text-blue-700 hover:underline">더 주문하기</a>
                 </div>
-            <?php endforeach; ?>
-        </div>
-        <div id="cartContainer">
-            <?php if ($hasCart) { $storeId = $cartStoreId; require 'cart_panel.php'; } ?>
-        </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <?php foreach ($g['products'] as $p): ?>
+                        <div class="bg-white rounded-lg shadow p-4 flex flex-col">
+                            <span class="text-xs bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded w-fit">
+                                <?= h($promotionLabels[$p['promotionType']] ?? '행사') ?>
+                            </span>
+                            <h4 class="font-bold text-slate-800 mt-2 flex-grow"><?= h($p['productName']) ?></h4>
+                            <p class="text-blue-900 font-bold mt-1"><?= number_format((float)$p['productPrice']) ?>원</p>
+                            <button type="button"
+                                    class="promo-add-btn mt-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold py-2 rounded"
+                                    data-store-id="<?= (int)$g['storeId'] ?>"
+                                    data-product-id="<?= (int)$p['productId'] ?>">
+                                장바구니에 담기
+                            </button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
 
+    <div id="cartContainer" class="hidden"></div>
+
     <style>
-    @media (min-width: 1024px) {
-        #promoLayout.has-cart {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 1.5rem;
-        }
+    #cartContainer:not(.hidden) {
+        position: fixed;
+        top: 50%;
+        right: 24px;
+        transform: translateY(-50%);
+        width: 300px;
+        max-height: 85vh;
+        z-index: 30;
+    }
+    /* fixed 부모 안에서는 cart_panel.php aside 의 sticky/transform 가 무의미하므로 무력화 */
+    #cartContainer #cartPanel {
+        position: static;
+        transform: none;
     }
     #cartToast, #crossStoreBanner {
         position: fixed;
@@ -159,7 +154,9 @@ require 'header.php';
         try {
             const res = await fetch('cart_panel.php?storeId=' + storeId);
             if (res.ok) {
-                document.getElementById('cartContainer').innerHTML = await res.text();
+                const c = document.getElementById('cartContainer');
+                c.classList.remove('hidden');
+                c.innerHTML = await res.text();
             }
         } catch (err) {}
     }
@@ -201,8 +198,6 @@ require 'header.php';
         if (res.status === 409) { showCrossStoreBanner(); return; }
         if (!res.ok) return;
 
-        // 카트 패널 표시(2열 레이아웃) 활성화 + 본문 갱신
-        document.getElementById('promoLayout').classList.add('has-cart');
         await refreshCartPanel(storeId);
         showCartToast();
     });
@@ -220,7 +215,9 @@ require 'header.php';
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
             } catch (err) { return; }
-            await refreshCartPanel(sid);
+            const c = document.getElementById('cartContainer');
+            c.classList.add('hidden');
+            c.innerHTML = '';
         }
     });
     </script>
