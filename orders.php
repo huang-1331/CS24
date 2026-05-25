@@ -64,7 +64,9 @@ require 'header.php';
     <?php else: ?>
         <?php if ($isNew): ?>
             <div class="bg-green-100 text-green-800 rounded-lg px-4 py-3 mb-4">
-                ✅ 주문이 완료되었습니다. 아래 픽업 코드를 매장에 보여주세요.
+                <?= $order['orderIsDelivery']
+                    ? '✅ 주문이 완료되었습니다. 곧 배송이 시작됩니다.'
+                    : '✅ 주문이 완료되었습니다. 아래 픽업 코드를 매장에 보여주세요.' ?>
             </div>
         <?php endif; ?>
 
