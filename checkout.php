@@ -240,7 +240,7 @@ require 'header.php';
             주문 확정 &amp; 결제하기
         </button>
     </form>
-    <a href="cart.php?storeId=<?= (int)$store['storeId'] ?>"
-       class="block text-center text-sm text-slate-500 mt-3 hover:underline">← 장바구니로 돌아가기</a>
+    <a href="products.php?storeId=<?= (int)$store['storeId'] ?>"
+       class="block text-center text-sm text-slate-500 mt-3 hover:underline">← 상품 보기로 돌아가기</a>
 <?php endif; ?>
 <?php require 'footer.php'; ?>

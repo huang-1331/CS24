@@ -1,5 +1,5 @@
 <?php
-// cart_process.php - 장바구니 담기/수정/삭제 처리 (HTML 출력 없이 redirect)
+// cart_process.php - 장바구니 담기/비우기 처리 (HTML 출력 없이 redirect 또는 204)
 require 'db.php';
 session_start();
 
@@ -20,7 +20,7 @@ if ($action === 'add') {
     $productId = (int)($_POST['productId'] ?? 0);
     $quantity  = max(1, (int)($_POST['quantity'] ?? 1));
 
-    // 같은 상품을 다시 담으면 수량을 합산한다 (UNIQUE: userId, storeId, productId).
+    // 같은 상품을 다시 담으면 수량을 합산 (UNIQUE: userId, storeId, productId).
     $stmt = $conn->prepare(
         "INSERT INTO P_CART (userId, storeId, productId, cartQuantity)
          VALUES (?, ?, ?, ?)
@@ -30,25 +30,12 @@ if ($action === 'add') {
     $stmt->execute();
     $stmt->close();
 
-} elseif ($action === 'update') {
-    $cartId   = (int)($_POST['cartId'] ?? 0);
-    $quantity = max(1, (int)($_POST['quantity'] ?? 1));
-
-    // cartId 와 userId 를 함께 조건으로 두어 타인의 장바구니는 수정할 수 없다.
+} elseif ($action === 'clear') {
+    // 해당 매장의 본인 장바구니를 전부 비우기.
     $stmt = $conn->prepare(
-        "UPDATE P_CART SET cartQuantity = ? WHERE cartId = ? AND userId = ?"
+        "DELETE FROM P_CART WHERE userId = ? AND storeId = ?"
     );
-    $stmt->bind_param("iii", $quantity, $cartId, $userId);
-    $stmt->execute();
-    $stmt->close();
-
-} elseif ($action === 'remove') {
-    $cartId = (int)($_POST['cartId'] ?? 0);
-
-    $stmt = $conn->prepare(
-        "DELETE FROM P_CART WHERE cartId = ? AND userId = ?"
-    );
-    $stmt->bind_param("ii", $cartId, $userId);
+    $stmt->bind_param("ii", $userId, $storeId);
     $stmt->execute();
     $stmt->close();
 }
@@ -59,9 +46,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'
     exit();
 }
 
-// 비-AJAX 폴백: add 는 products.php 로 돌아가고, 수정/삭제는 기존대로 cart.php
-$target = ($action === 'add')
-    ? "products.php?storeId=$storeId&added=1"
-    : "cart.php?storeId=$storeId";
+// 비-AJAX 폴백: 어떤 액션이든 products.php 로 돌아감
+$target = "products.php?storeId=$storeId" . ($action === 'add' ? '&added=1' : '');
 header("Location: $target");
 exit();

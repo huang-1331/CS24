@@ -101,28 +101,45 @@ function render_product_card($p, $storeId, $promotionLabels) {
 $pageTitle = $store['storeName'] . ' 상품';
 require 'header.php';
 ?>
-<div class="flex items-center justify-between">
+<div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
+    <!-- 좌측: 상품 -->
     <div>
         <h1 class="text-2xl font-bold text-blue-900"><?= h($store['storeName']) ?></h1>
         <p class="text-slate-600 mt-1">상품을 장바구니에 담아 보세요.</p>
+
+        <?php if ($promo): ?>
+            <h2 class="text-lg font-bold text-amber-600 mt-6 mb-3">🔥 행사 중!</h2>
+            <div class="grid sm:grid-cols-2 gap-4">
+                <?php foreach ($promo as $p) render_product_card($p, $store['storeId'], $promotionLabels); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($regular): ?>
+            <h2 class="text-lg font-bold text-slate-700 mt-8 mb-3">일반 상품</h2>
+            <div class="grid sm:grid-cols-2 gap-4">
+                <?php foreach ($regular as $p) render_product_card($p, $store['storeId'], $promotionLabels); ?>
+            </div>
+        <?php endif; ?>
     </div>
-    <a href="cart.php?storeId=<?= (int)$store['storeId'] ?>"
-       class="bg-blue-900 hover:bg-blue-800 text-white text-sm font-semibold px-4 py-2 rounded">🛒 장바구니</a>
+
+    <!-- 우측: 카트 사이드 패널 -->
+    <aside class="lg:sticky lg:top-4 h-fit bg-white rounded-lg shadow p-4">
+        <div class="flex items-center justify-between">
+            <h3 class="font-bold text-blue-900">🛒 장바구니</h3>
+            <button id="cartClearBtn" type="button"
+                    class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-600 px-2 py-1 rounded">
+                비우기
+            </button>
+        </div>
+        <div id="cartPanelBody" class="mt-3">
+            <?php $storeId = (int)$store['storeId']; require 'cart_panel.php'; ?>
+        </div>
+        <a href="checkout.php?storeId=<?= (int)$store['storeId'] ?>"
+           class="block text-center mt-4 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded">
+            주문하기
+        </a>
+    </aside>
 </div>
-
-<?php if ($promo): ?>
-    <h2 class="text-lg font-bold text-amber-600 mt-6 mb-3">🔥 행사 중!</h2>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <?php foreach ($promo as $p) render_product_card($p, $store['storeId'], $promotionLabels); ?>
-    </div>
-<?php endif; ?>
-
-<?php if ($regular): ?>
-    <h2 class="text-lg font-bold text-slate-700 mt-8 mb-3">일반 상품</h2>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <?php foreach ($regular as $p) render_product_card($p, $store['storeId'], $promotionLabels); ?>
-    </div>
-<?php endif; ?>
 
 <style>
 #cartToast {
@@ -148,6 +165,8 @@ require 'header.php';
 }
 </style>
 <script>
+const STORE_ID = <?= (int)$store['storeId'] ?>;
+
 document.querySelectorAll('.add-to-cart-form').forEach(form => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -159,8 +178,32 @@ document.querySelectorAll('.add-to-cart-form').forEach(form => {
             });
         } catch (err) { return; }
         showCartToast();
+        refreshCartPanel();
     });
 });
+
+document.getElementById('cartClearBtn').addEventListener('click', async () => {
+    if (!confirm('장바구니를 비우시겠습니까?')) return;
+    const body = new URLSearchParams({ action: 'clear', storeId: STORE_ID });
+    try {
+        await fetch('cart_process.php', {
+            method: 'POST',
+            body,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+    } catch (err) { return; }
+    refreshCartPanel();
+});
+
+async function refreshCartPanel() {
+    try {
+        const res = await fetch('cart_panel.php?storeId=' + STORE_ID);
+        if (res.ok) {
+            document.getElementById('cartPanelBody').innerHTML = await res.text();
+        }
+    } catch (err) {}
+}
+
 function showCartToast() {
     document.getElementById('cartToast')?.remove();
     const t = document.createElement('div');
