@@ -16,6 +16,7 @@ require 'header.php';
 <div class="max-w-sm mx-auto bg-white rounded-lg shadow p-8">
     <h2 class="text-2xl font-bold text-blue-900 text-center">🏪 로그인</h2>
     <p class="text-slate-500 text-sm text-center mt-1">서비스 이용을 위해 로그인해 주세요.</p>
+    <p class="text-slate-400 text-xs text-center mt-1">※ 테스트 계정: test / 1234</p>
 
     <?php if ($noticeMessage): ?>
         <div class="mt-4 bg-green-100 text-green-700 text-sm rounded px-4 py-2"><?= h($noticeMessage) ?></div>

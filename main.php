@@ -206,6 +206,59 @@ require 'header.php';
         showCartToast();
     });
 
+    // 개별 상품 삭제 (❌ 버튼)
+    document.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.cart-remove-btn');
+        if (!btn) return;
+        const body = new URLSearchParams({
+            action: 'remove',
+            storeId: btn.dataset.storeId,
+            productId: btn.dataset.productId,
+        });
+        try {
+            await fetch('cart_process.php', {
+                method: 'POST', body,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+        } catch (err) { return; }
+        await refreshCartPanel(btn.dataset.storeId);
+    });
+
+    // 수량 input — 실시간 소계 갱신
+    document.addEventListener('input', (e) => {
+        if (!e.target.classList.contains('cart-qty-input')) return;
+        const qty = Math.max(1, parseInt(e.target.value, 10) || 1);
+        const unitPrice = parseFloat(e.target.dataset.unitPrice) || 0;
+        const subtotalEl = e.target.closest('li')?.querySelector('.cart-item-subtotal');
+        if (subtotalEl) subtotalEl.textContent = Math.round(qty * unitPrice).toLocaleString('ko-KR') + '원';
+        let total = 0;
+        document.querySelectorAll('.cart-qty-input').forEach(inp => {
+            total += Math.max(1, parseInt(inp.value, 10) || 1) * (parseFloat(inp.dataset.unitPrice) || 0);
+        });
+        const totalEl = document.getElementById('cartPanelTotal');
+        if (totalEl) totalEl.textContent = Math.round(total).toLocaleString('ko-KR') + '원';
+    });
+
+    // 수량 input — 서버 반영 후 패널 갱신
+    document.addEventListener('change', async (e) => {
+        if (!e.target.classList.contains('cart-qty-input')) return;
+        const qty = Math.max(1, parseInt(e.target.value, 10) || 1);
+        e.target.value = qty;
+        const body = new URLSearchParams({
+            action: 'update',
+            storeId: e.target.dataset.storeId,
+            productId: e.target.dataset.productId,
+            quantity: qty,
+        });
+        try {
+            await fetch('cart_process.php', {
+                method: 'POST', body,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+        } catch (err) { return; }
+        await refreshCartPanel(e.target.dataset.storeId);
+    });
+
     // 카트 패널의 '비우기' 버튼 (패널이 동적으로 교체되므로 이벤트 위임)
     document.addEventListener('click', async (e) => {
         if (e.target && e.target.id === 'cartClearBtn') {

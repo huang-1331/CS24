@@ -48,6 +48,27 @@ if ($action === 'add') {
     $stmt->execute();
     $stmt->close();
 
+} elseif ($action === 'remove') {
+    $productId = (int)($_POST['productId'] ?? 0);
+    $stmt = $conn->prepare(
+        "DELETE FROM P_CART WHERE userId = ? AND storeId = ? AND productId = ?"
+    );
+    $stmt->bind_param("iii", $userId, $storeId, $productId);
+    $stmt->execute();
+    $stmt->close();
+
+} elseif ($action === 'update') {
+    $productId = (int)($_POST['productId'] ?? 0);
+    $quantity  = max(1, (int)($_POST['quantity'] ?? 1));
+
+    $stmt = $conn->prepare(
+        "UPDATE P_CART SET cartQuantity = ?
+         WHERE userId = ? AND storeId = ? AND productId = ?"
+    );
+    $stmt->bind_param("iiii", $quantity, $userId, $storeId, $productId);
+    $stmt->execute();
+    $stmt->close();
+
 } elseif ($action === 'clear') {
     // 해당 매장의 본인 장바구니를 전부 비우기.
     $stmt = $conn->prepare(

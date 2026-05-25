@@ -5,6 +5,17 @@
 //   2) AJAX 로 직접 호출 — 세션·DB 부트스트랩 후 $_GET['storeId'] 에서 읽음.
 
 if (!isset($conn)) require __DIR__ . '/db.php';
+
+// 행사 유형과 재고를 고려한 최대 구매 가능 수량
+// ONE_PLUS_ONE: 1개 구매 → 2개 소비 → max = floor(stock / 2)
+// TWO_PLUS_ONE: q구매 → q + floor(q/2) 소비 → max = floor((2*stock + 1) / 3)
+if (!function_exists('cart_max_qty')) {
+    function cart_max_qty(string $promoType, int $stock): int {
+        if ($promoType === 'ONE_PLUS_ONE') return (int)floor($stock / 2);
+        if ($promoType === 'TWO_PLUS_ONE') return (int)floor((2 * $stock + 1) / 3);
+        return $stock;
+    }
+}
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 if (!isset($_SESSION['user_id'])) {
@@ -17,9 +28,11 @@ if (!isset($storeId)) {
 }
 
 $stmt = $conn->prepare(
-    "SELECT c.cartQuantity, c.storeId, p.productName, p.productPrice
+    "SELECT c.cartQuantity, c.storeId, c.productId, p.productName, p.productPrice,
+            p.promotionType, COALESCE(i.inventoryQuantity, 0) AS inventoryQuantity
      FROM P_CART c
      JOIN P_PRODUCT p ON p.productId = c.productId
+     LEFT JOIN P_STORE_INVENTORY i ON i.storeId = c.storeId AND i.productId = c.productId
      WHERE c.userId = ?
      ORDER BY p.productName"
 );
@@ -52,14 +65,20 @@ foreach ($items as $it) {
         <?php else: ?>
             <ul class="divide-y">
             <?php foreach ($items as $it): ?>
-                <li class="py-2 flex items-center justify-between gap-2">
-                    <div class="flex-grow min-w-0">
-                        <p class="text-sm font-semibold text-slate-800 truncate"><?= h($it['productName']) ?></p>
-                        <p class="text-xs text-slate-400">
-                            <?= number_format((float)$it['productPrice']) ?>원 &times; <?= (int)$it['cartQuantity'] ?>개
-                        </p>
-                    </div>
-                    <div class="text-sm font-bold text-blue-900 flex-shrink-0">
+                <?php $maxQty = cart_max_qty($it['promotionType'], (int)$it['inventoryQuantity']); ?>
+                <li class="py-2 flex items-center gap-2">
+                    <button type="button"
+                            class="cart-remove-btn flex-shrink-0 text-slate-300 hover:text-red-500 transition-colors leading-none"
+                            data-product-id="<?= (int)$it['productId'] ?>"
+                            data-store-id="<?= (int)$it['storeId'] ?>">❌</button>
+                    <p class="text-sm font-semibold text-slate-800 truncate flex-grow min-w-0"><?= h($it['productName']) ?></p>
+                    <input type="number"
+                           class="cart-qty-input w-14 border border-slate-300 rounded px-1 py-1 text-sm text-center flex-shrink-0"
+                           value="<?= (int)$it['cartQuantity'] ?>" min="1" max="<?= $maxQty ?>"
+                           data-product-id="<?= (int)$it['productId'] ?>"
+                           data-store-id="<?= (int)$it['storeId'] ?>"
+                           data-unit-price="<?= (float)$it['productPrice'] ?>">
+                    <div class="text-sm font-bold text-blue-900 flex-shrink-0 cart-item-subtotal">
                         <?= number_format((float)($it['cartQuantity'] * $it['productPrice'])) ?>원
                     </div>
                 </li>
@@ -69,7 +88,7 @@ foreach ($items as $it) {
             <div class="border-t border-dashed border-slate-200 pt-3 mt-2">
                 <div class="flex items-center justify-between font-bold text-slate-800">
                     <span>총 결제금액</span>
-                    <span class="text-lg text-blue-900"><?= number_format((float)$total) ?>원</span>
+                    <span id="cartPanelTotal" class="text-lg text-blue-900"><?= number_format((float)$total) ?>원</span>
                 </div>
             </div>
         <?php endif; ?>

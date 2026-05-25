@@ -252,8 +252,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// 개별 상품 삭제 (❌ 버튼)
+document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.cart-remove-btn');
+    if (!btn) return;
+    const body = new URLSearchParams({
+        action: 'remove',
+        storeId: btn.dataset.storeId,
+        productId: btn.dataset.productId,
+    });
+    try {
+        await fetch('cart_process.php', {
+            method: 'POST', body,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+    } catch (err) { return; }
+    refreshCartPanel();
+});
+
+// 수량 input — 실시간 소계 갱신
+document.addEventListener('input', (e) => {
+    if (!e.target.classList.contains('cart-qty-input')) return;
+    const qty = Math.max(1, parseInt(e.target.value, 10) || 1);
+    const unitPrice = parseFloat(e.target.dataset.unitPrice) || 0;
+    const subtotalEl = e.target.closest('li')?.querySelector('.cart-item-subtotal');
+    if (subtotalEl) subtotalEl.textContent = Math.round(qty * unitPrice).toLocaleString('ko-KR') + '원';
+    let total = 0;
+    document.querySelectorAll('.cart-qty-input').forEach(inp => {
+        total += Math.max(1, parseInt(inp.value, 10) || 1) * (parseFloat(inp.dataset.unitPrice) || 0);
+    });
+    const totalEl = document.getElementById('cartPanelTotal');
+    if (totalEl) totalEl.textContent = Math.round(total).toLocaleString('ko-KR') + '원';
+});
+
+// 수량 input — 서버 반영 후 패널 갱신
+document.addEventListener('change', async (e) => {
+    if (!e.target.classList.contains('cart-qty-input')) return;
+    const qty = Math.max(1, parseInt(e.target.value, 10) || 1);
+    e.target.value = qty;
+    const body = new URLSearchParams({
+        action: 'update',
+        storeId: e.target.dataset.storeId,
+        productId: e.target.dataset.productId,
+        quantity: qty,
+    });
+    try {
+        await fetch('cart_process.php', {
+            method: 'POST', body,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+    } catch (err) { return; }
+    refreshCartPanel();
+});
+
 // === 휘발성 카트 이탈 가드 ===
 // products.php 에서 다른 페이지로 이동 시 카트를 영구 저장하지 않는다.
+
+let bypassUnloadGuard = false;
 
 function cartHasItems() {
     return document.querySelector('#cartPanelBody ul') !== null;
@@ -275,7 +330,7 @@ document.addEventListener('click', async (e) => {
     if (!link) return;
     const href = link.getAttribute('href');
     if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
-    if (href.includes('checkout.php')) return;
+    if (href.includes('checkout.php')) { bypassUnloadGuard = true; return; }
     if (!cartHasItems()) return;
     e.preventDefault();
     if (confirm('담은 항목은 저장되지 않습니다. 계속하시겠습니까?')) {
@@ -286,6 +341,7 @@ document.addEventListener('click', async (e) => {
 
 // 닫기/새로고침/뒤로가기: 브라우저 표준 확인창
 window.addEventListener('beforeunload', (e) => {
+    if (bypassUnloadGuard) return;
     if (cartHasItems()) {
         e.preventDefault();
         e.returnValue = '';
@@ -294,6 +350,7 @@ window.addEventListener('beforeunload', (e) => {
 
 // 실제 이탈 시 best-effort clear
 window.addEventListener('pagehide', () => {
+    if (bypassUnloadGuard) return;
     if (cartHasItems()) {
         navigator.sendBeacon(
             'cart_process.php',
