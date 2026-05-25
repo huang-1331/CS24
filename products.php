@@ -121,22 +121,9 @@ require 'header.php';
         <?php endif; ?>
     </div>
 
-    <aside class="lg:sticky lg:top-1/2 lg:-translate-y-1/2 max-h-[80vh] flex flex-col bg-white rounded-lg shadow p-4">
-        <div class="flex items-center justify-between flex-shrink-0">
-            <h3 class="font-bold text-blue-900">🛒 장바구니</h3>
-            <button id="cartClearBtn" type="button"
-                    class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-600 px-2 py-1 rounded">
-                비우기
-            </button>
-        </div>
-        <div id="cartPanelBody" class="mt-3 flex-1 overflow-y-auto pr-1">
-            <?php $storeId = (int)$store['storeId']; require 'cart_panel.php'; ?>
-        </div>
-        <a href="checkout.php?storeId=<?= (int)$store['storeId'] ?>"
-           class="block text-center mt-4 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded flex-shrink-0">
-            주문하기
-        </a>
-    </aside>
+    <div id="cartContainer">
+        <?php $storeId = (int)$store['storeId']; require 'cart_panel.php'; ?>
+    </div>
 </div>
 
 <style>
@@ -165,39 +152,43 @@ require 'header.php';
 <script>
 const STORE_ID = <?= (int)$store['storeId'] ?>;
 
-document.querySelectorAll('.add-to-cart-form').forEach(form => {
-    form.addEventListener('submit', async (e) => {
+// 이벤트 위임(Event Delegation)을 적용하여 비동기 갱신 후에도 버튼 이벤트 유지
+document.addEventListener('submit', async (e) => {
+    if (e.target && e.target.classList.contains('add-to-cart-form')) {
         e.preventDefault();
         try {
             await fetch('cart_process.php', {
                 method: 'POST',
-                body: new FormData(form),
+                body: new FormData(e.target),
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
         } catch (err) { return; }
         showCartToast();
         refreshCartPanel();
-    });
+    }
 });
 
-document.getElementById('cartClearBtn').addEventListener('click', async () => {
-    if (!confirm('장바구니를 비우시겠습니까?')) return;
-    const body = new URLSearchParams({ action: 'clear', storeId: STORE_ID });
-    try {
-        await fetch('cart_process.php', {
-            method: 'POST',
-            body,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
-    } catch (err) { return; }
-    refreshCartPanel();
+document.addEventListener('click', async (e) => {
+    if (e.target && e.target.id === 'cartClearBtn') {
+        if (!confirm('장바구니를 비우시겠습니까?')) return;
+        const body = new URLSearchParams({ action: 'clear', storeId: STORE_ID });
+        try {
+            await fetch('cart_process.php', {
+                method: 'POST',
+                body,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+        } catch (err) { return; }
+        refreshCartPanel();
+    }
 });
 
 async function refreshCartPanel() {
     try {
         const res = await fetch('cart_panel.php?storeId=' + STORE_ID);
         if (res.ok) {
-            document.getElementById('cartPanelBody').innerHTML = await res.text();
+            // 모듈화 변화 반영: 최외각 컨테이너 전체를 교체하여 이벤트 및 스타일 동기화
+            document.getElementById('cartContainer').innerHTML = await res.text();
         }
     } catch (err) {}
 }

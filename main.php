@@ -18,7 +18,7 @@ require 'header.php';
         <h3 class="text-lg font-bold text-blue-900">🧊 나만의 냉장고</h3>
         <p class="text-slate-500 text-sm mt-1">구매한 증정품을 안전하게 보관하고 필요할 때 꺼내 드세요.</p>
     </a>
-    <a href="stores.php" class="block bg-white rounded-lg shadow p-6 hover:shadow-md hover:bg-blue-50 transition">
+    <a href="stock.php" class="block bg-white rounded-lg shadow p-6 hover:shadow-md hover:bg-blue-50 transition">
         <h3 class="text-lg font-bold text-blue-900">🔍 실시간 재고 찾기</h3>
         <p class="text-slate-500 text-sm mt-1">우리 동네 CS24 매장의 상품 재고를 실시간으로 확인합니다.</p>
     </a>
@@ -26,9 +26,9 @@ require 'header.php';
         <h3 class="text-lg font-bold text-blue-900">📦 주문 &amp; 픽업 내역</h3>
         <p class="text-slate-500 text-sm mt-1">내가 주문한 상품의 픽업 코드와 과거 내역을 조회합니다.</p>
     </a>
-    <a href="delivery.php" class="block bg-white rounded-lg shadow p-6 hover:shadow-md hover:bg-blue-50 transition">
-        <h3 class="text-lg font-bold text-blue-900">🛵 배달</h3>
-        <p class="text-slate-500 text-sm mt-1">편의점 상품을 집 앞까지 빠르게 배달해 드립니다.</p>
+    <a href="stores.php" class="block bg-white rounded-lg shadow p-6 hover:shadow-md hover:bg-blue-50 transition">
+        <h3 class="text-lg font-bold text-blue-900">🧺 주문하기</h3>
+        <p class="text-slate-500 text-sm mt-1">편의점 상품을 원격으로 주문합니다.</p>
     </a>
 </div>
 <?php require 'footer.php'; ?>
