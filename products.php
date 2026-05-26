@@ -61,24 +61,24 @@ function render_product_card($p, $storeId, $promotionLabels) {
     $stock   = (int)$p['inventoryQuantity'];
     $soldOut = $stock <= 0;
     ?>
-    <div class="bg-white rounded-lg shadow p-5 flex flex-col">
+    <div class="card-hover bg-canvas border border-hairline rounded-card p-5 flex flex-col">
         <div class="flex items-start justify-between">
-            <span class="text-xs text-slate-400"><?= h($p['categoryName']) ?></span>
+            <span class="text-[11px] font-semibold uppercase tracking-wide text-muted"><?= h($p['categoryName']) ?></span>
             <?php if ($p['promotionType'] !== 'NONE'): ?>
-                <span class="text-xs bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded">
+                <span class="text-[11px] font-semibold text-ink bg-canvas border border-hairline shadow-sm px-2 py-0.5 rounded-full">
                     <?= h($promotionLabels[$p['promotionType']] ?? '행사') ?>
                 </span>
             <?php endif; ?>
         </div>
-        <h3 class="font-bold text-slate-800 mt-1"><?= h($p['productName']) ?></h3>
-        <p class="text-blue-900 font-bold text-lg mt-1"><?= number_format((float)$p['productPrice']) ?>원</p>
-        <p class="text-xs mt-1 <?= $soldOut ? 'text-red-500 font-semibold' : 'text-slate-400' ?>">
+        <h3 class="font-semibold text-ink mt-2"><?= h($p['productName']) ?></h3>
+        <p class="text-ink font-medium mt-1"><?= number_format((float)$p['productPrice']) ?>원</p>
+        <p class="text-xs mt-1 <?= $soldOut ? 'text-error font-medium' : 'text-muted' ?>">
             <?= $soldOut ? '품절' : '재고 ' . $stock . '개' ?>
         </p>
 
         <?php if ($soldOut): ?>
             <button disabled
-                    class="mt-3 bg-slate-200 text-slate-400 text-sm font-semibold py-2 rounded cursor-not-allowed">
+                    class="mt-3 h-10 bg-surface-soft text-muted-soft text-sm font-medium rounded-lg cursor-not-allowed">
                 품절
             </button>
         <?php else: ?>
@@ -87,9 +87,9 @@ function render_product_card($p, $storeId, $promotionLabels) {
                 <input type="hidden" name="storeId" value="<?= (int)$storeId ?>">
                 <input type="hidden" name="productId" value="<?= (int)$p['productId'] ?>">
                 <input type="number" name="quantity" value="1" min="1" max="<?= $stock ?>"
-                       class="w-16 border border-slate-300 rounded px-2 py-1 text-sm">
+                       class="w-16 h-10 border border-hairline rounded-lg px-2 text-sm text-center">
                 <button type="submit"
-                        class="flex-grow bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold py-1 rounded">
+                        class="flex-grow h-10 bg-rausch hover:bg-rausch-active text-white text-sm font-medium rounded-lg transition-colors">
                     담기
                 </button>
             </form>
@@ -103,18 +103,18 @@ require 'header.php';
 ?>
 <div class="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
     <div>
-        <h1 class="text-2xl font-bold text-blue-900"><?= h($store['storeName']) ?></h1>
-        <p class="text-slate-600 mt-1">상품을 장바구니에 담아 보세요.</p>
+        <h1 class="text-[28px] leading-snug font-bold text-ink tracking-tight"><?= h($store['storeName']) ?></h1>
+        <p class="text-muted mt-2">상품을 장바구니에 담아 보세요.</p>
 
         <?php if ($promo): ?>
-            <h2 class="text-lg font-bold text-amber-600 mt-6 mb-3">🔥 행사 중!</h2>
+            <h2 class="text-[22px] font-semibold text-rausch/80 tracking-tight mt-10 mb-4">🔥 행사 중</h2>
             <div class="grid sm:grid-cols-2 gap-4">
                 <?php foreach ($promo as $p) render_product_card($p, $store['storeId'], $promotionLabels); ?>
             </div>
         <?php endif; ?>
 
         <?php if ($regular): ?>
-            <h2 class="text-lg font-bold text-slate-700 mt-8 mb-3">일반 상품</h2>
+            <h2 class="text-[22px] font-semibold text-ink tracking-tight mt-12 mb-4">일반 상품</h2>
             <div class="grid sm:grid-cols-2 gap-4">
                 <?php foreach ($regular as $p) render_product_card($p, $store['storeId'], $promotionLabels); ?>
             </div>
@@ -127,41 +127,28 @@ require 'header.php';
 </div>
 
 <style>
-#cartToast {
+#cartToast, #crossStoreBanner {
     position: fixed;
-    bottom: 24px;
+    bottom: 32px;
     left: 50%;
     transform: translateX(-50%);
-    background: #10b981;
     color: white;
-    padding: 12px 24px;
-    border-radius: 9999px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 14px 24px;
+    border-radius: 8px;
+    box-shadow: rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px 0, rgba(0,0,0,0.1) 0 4px 8px 0;
     z-index: 50;
-    font-weight: 600;
+    font-weight: 500;
+    font-size: 14px;
     pointer-events: none;
     animation: cartToast 2.5s ease-out forwards;
 }
+#cartToast        { background: #222222; }
+#crossStoreBanner { background: #c13515; }
 @keyframes cartToast {
     0%   { opacity: 0; transform: translate(-50%, 20px); }
     10%  { opacity: 1; transform: translate(-50%, 0); }
     80%  { opacity: 1; transform: translate(-50%, 0); }
     100% { opacity: 0; transform: translate(-50%, 20px); }
-}
-#crossStoreBanner {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #ef4444;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 9999px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 50;
-    font-weight: 600;
-    pointer-events: none;
-    animation: cartToast 2.5s ease-out forwards;
 }
 </style>
 <script>

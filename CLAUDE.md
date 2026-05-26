@@ -79,6 +79,48 @@ P_USER ─── P_CART ─────────── P_STORE
 
 실패 시 `rollback()`.
 
+## Design System (Airbnb-inspired, `claude-design` 브랜치)
+
+`header.php`에서 Tailwind config 인라인 확장으로 토큰을 정의. 모든 페이지가 이 토큰을 공유.
+
+### Color Tokens
+- `rausch` #ff385c (primary CTA, 링크, search orb — **드물게** 사용)
+- `rausch-active` #e00b41 (hover/press)
+- `ink` #222222 (헤딩, 본문 강조), `body` #3f3f3f, `muted` #6a6a6a, `muted-soft` #929292
+- `canvas` #ffffff (페이지 배경), `surface-soft` #f7f7f7 (subdued fill, 상태 pill 배경)
+- `hairline` #dddddd (1px 보더), `hairline-soft` #ebebeb (divide-y)
+- `error` #c13515 (인라인 에러 텍스트)
+
+### Typography
+- 폰트: Inter (Google Fonts, header.php에서 로드), fallback system stack
+- Hero h1: 28px / 700 / `-0.018em` tracking
+- Section h2: 22px / 600 / tight tracking
+- Body: 16px / 400, body-sm: 14px / 400
+- Caption (uppercase label): 11–12px / 500–600
+- 픽업 코드 (단 하나의 "loud moment"): 64px / 700
+
+### Shape
+- 버튼: `rounded-lg` (8px), 모든 primary CTA 높이 48px
+- 카드: `rounded-card` (14px) + `border border-hairline`
+- pill (배지·검색바·search orb·"담기" CTA): `rounded-full`
+- input: `rounded-lg`, 56px 높이, focus 시 2px ink 보더 (글로우 없음 — header.php inline CSS)
+
+### Elevation
+단일 그림자 tier만 사용: `shadow-card` 클래스
+```
+rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px 0, rgba(0,0,0,0.1) 0 4px 8px 0
+```
+- 카드 hover elevation: `.card-hover` 클래스 (header.php 인라인 CSS)
+- search bar at rest: `shadow-card` 직접 적용
+
+### 컴포넌트 패턴
+- **Primary 버튼**: `bg-rausch hover:bg-rausch-active text-white rounded-lg h-12 font-medium`
+- **Secondary 버튼**: `bg-canvas border border-ink text-ink rounded-lg`
+- **Tertiary 링크**: `text-ink underline underline-offset-4`
+- **상태/배달 pill**: `bg-surface-soft text-ink rounded-full px-3 py-1.5 text-xs font-medium`
+- **행사 배지 (1+1, 2+1)**: `bg-canvas border border-hairline shadow-sm rounded-full text-[11px] font-semibold text-ink` (Guest favorite 패턴)
+- **toast/banner**: ink(`#222`) / error(`#c13515`) 배경 + white 텍스트 + `rounded-lg` + `shadow-card`
+
 ## Code Conventions
 
 - **XSS 방지**: 모든 출력은 `h()` 래핑 (`htmlspecialchars` ENT_QUOTES)

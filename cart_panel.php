@@ -50,52 +50,52 @@ foreach ($items as $it) {
 }
 ?>
 
-<aside id="cartPanel" class="lg:sticky lg:top-1/2 lg:-translate-y-1/2 max-h-[80vh] flex flex-col bg-white rounded-lg shadow p-4">
+<aside id="cartPanel" class="lg:sticky lg:top-1/2 lg:-translate-y-1/2 max-h-[80vh] flex flex-col bg-canvas border border-hairline rounded-card shadow-card p-6">
     <div class="flex items-center justify-between flex-shrink-0">
-        <h3 class="font-bold text-blue-900">🛒 장바구니</h3>
+        <h3 class="text-base font-semibold text-ink">장바구니</h3>
         <button id="cartClearBtn" type="button"
-                class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-600 px-2 py-1 rounded">
+                class="text-xs text-muted hover:text-ink underline underline-offset-4">
             비우기
         </button>
     </div>
-    
-    <div id="cartPanelBody" class="mt-3 flex-1 overflow-y-auto pr-1">
+
+    <div id="cartPanelBody" class="mt-4 flex-1 overflow-y-auto pr-1">
         <?php if (!$items): ?>
-            <p class="text-slate-400 text-sm text-center py-6">장바구니가 비어 있습니다.</p>
+            <p class="text-muted text-sm text-center py-8">장바구니가 비어 있습니다.</p>
         <?php else: ?>
-            <ul class="divide-y">
+            <ul class="divide-y divide-hairline-soft">
             <?php foreach ($items as $it): ?>
                 <?php $maxQty = cart_max_qty($it['promotionType'], (int)$it['inventoryQuantity']); ?>
-                <li class="py-2 flex items-center gap-2">
+                <li class="py-3 flex items-center gap-2">
                     <button type="button"
-                            class="cart-remove-btn flex-shrink-0 text-slate-300 hover:text-red-500 transition-colors leading-none"
+                            class="cart-remove-btn flex-shrink-0 text-muted-soft hover:text-error transition-colors text-xs leading-none"
                             data-product-id="<?= (int)$it['productId'] ?>"
                             data-store-id="<?= (int)$it['storeId'] ?>">❌</button>
-                    <p class="text-sm font-semibold text-slate-800 truncate flex-grow min-w-0"><?= h($it['productName']) ?></p>
+                    <p class="text-sm font-medium text-ink truncate flex-grow min-w-0"><?= h($it['productName']) ?></p>
                     <input type="number"
-                           class="cart-qty-input w-14 border border-slate-300 rounded px-1 py-1 text-sm text-center flex-shrink-0"
+                           class="cart-qty-input w-14 h-9 border border-hairline rounded-lg px-1 text-sm text-center flex-shrink-0"
                            value="<?= (int)$it['cartQuantity'] ?>" min="1" max="<?= $maxQty ?>"
                            data-product-id="<?= (int)$it['productId'] ?>"
                            data-store-id="<?= (int)$it['storeId'] ?>"
                            data-unit-price="<?= (float)$it['productPrice'] ?>">
-                    <div class="text-sm font-bold text-blue-900 flex-shrink-0 cart-item-subtotal">
+                    <div class="text-sm font-semibold text-ink flex-shrink-0 cart-item-subtotal w-20 text-right">
                         <?= number_format((float)($it['cartQuantity'] * $it['productPrice'])) ?>원
                     </div>
                 </li>
             <?php endforeach; ?>
             </ul>
 
-            <div class="border-t border-dashed border-slate-200 pt-3 mt-2">
-                <div class="flex items-center justify-between font-bold text-slate-800">
-                    <span>총 결제금액</span>
-                    <span id="cartPanelTotal" class="text-lg text-blue-900"><?= number_format((float)$total) ?>원</span>
+            <div class="border-t border-hairline pt-4 mt-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-muted">총 결제금액</span>
+                    <span id="cartPanelTotal" class="text-[22px] font-semibold text-ink tracking-tight"><?= number_format((float)$total) ?>원</span>
                 </div>
             </div>
         <?php endif; ?>
     </div>
-    
+
     <a href="checkout.php?storeId=<?= $effectiveStoreId ?>"
-       class="block text-center mt-4 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded flex-shrink-0">
+       class="flex items-center justify-center mt-5 h-12 bg-rausch hover:bg-rausch-active text-white font-medium rounded-lg flex-shrink-0 transition-colors">
         주문하기
     </a>
 </aside>

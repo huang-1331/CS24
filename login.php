@@ -13,34 +13,34 @@ $noticeMessage = ($_GET['signup'] ?? '') === 'success' ? '회원가입이 완료
 $pageTitle = '로그인';
 require 'header.php';
 ?>
-<div class="max-w-sm mx-auto bg-white rounded-lg shadow p-8">
-    <h2 class="text-2xl font-bold text-blue-900 text-center">🏪 로그인</h2>
-    <p class="text-slate-500 text-sm text-center mt-1">서비스 이용을 위해 로그인해 주세요.</p>
-    <p class="text-slate-400 text-xs text-center mt-1">※ 테스트 계정: test / 1234</p>
+<div class="max-w-md mx-auto bg-canvas border border-hairline rounded-card p-8">
+    <h2 class="text-[22px] font-semibold text-ink text-center tracking-tight">로그인</h2>
+    <p class="text-muted text-sm text-center mt-2">서비스 이용을 위해 로그인해 주세요.</p>
+    <p class="text-muted-soft text-xs text-center mt-1">※ 테스트 계정: test / 1234</p>
 
     <?php if ($noticeMessage): ?>
-        <div class="mt-4 bg-green-100 text-green-700 text-sm rounded px-4 py-2"><?= h($noticeMessage) ?></div>
+        <div class="mt-5 bg-surface-soft text-ink text-sm rounded-lg px-4 py-3"><?= h($noticeMessage) ?></div>
     <?php endif; ?>
     <?php if ($errorMessage): ?>
-        <div class="mt-4 bg-red-100 text-red-700 text-sm rounded px-4 py-2"><?= h($errorMessage) ?></div>
+        <div class="mt-5 text-error text-sm font-medium"><?= h($errorMessage) ?></div>
     <?php endif; ?>
 
-    <form action="login_process.php" method="POST" class="mt-6 space-y-3">
+    <form action="login_process.php" method="POST" class="mt-6 space-y-4">
         <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">아이디</label>
+            <label class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">아이디</label>
             <input type="text" name="login_id" required
-                   class="w-full border border-slate-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                   class="w-full h-14 border border-hairline rounded-lg px-4 text-ink placeholder-muted-soft">
         </div>
         <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">비밀번호</label>
+            <label class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">비밀번호</label>
             <input type="password" name="login_pw" required
-                   class="w-full border border-slate-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                   class="w-full h-14 border border-hairline rounded-lg px-4 text-ink placeholder-muted-soft">
         </div>
         <button type="submit"
-                class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 rounded mt-2">로그인</button>
+                class="w-full h-12 bg-rausch hover:bg-rausch-active text-white font-medium rounded-lg mt-2 transition-colors">로그인</button>
     </form>
-    <p class="text-center text-sm text-slate-500 mt-4">
-        계정이 없으신가요? <a href="signup.php" class="text-blue-700 font-semibold">회원가입</a>
+    <p class="text-center text-sm text-muted mt-6">
+        계정이 없으신가요? <a href="signup.php" class="text-ink font-semibold underline underline-offset-4">회원가입</a>
     </p>
 </div>
 <?php require 'footer.php'; ?>

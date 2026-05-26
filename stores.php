@@ -18,16 +18,17 @@ $stores = $conn->query(
 $pageTitle = '매장 선택';
 require 'header.php';
 ?>
-<h1 class="text-2xl font-bold text-blue-900">매장 선택</h1>
-<p class="text-slate-600 mt-1">상품을 둘러볼 매장을 선택하세요.</p>
+<h1 class="text-[22px] font-semibold text-ink tracking-tight">매장 선택</h1>
+<p class="text-muted mt-2">상품을 둘러볼 매장을 선택하세요.</p>
 
-<div class="grid sm:grid-cols-2 gap-4 mt-6">
+<div class="grid sm:grid-cols-2 gap-4 mt-8">
 <?php while ($store = $stores->fetch_assoc()): ?>
     <a href="products.php?storeId=<?= (int)$store['storeId'] ?>"
-       class="block bg-white rounded-lg shadow p-5 hover:shadow-md hover:bg-blue-50 transition">
-        <h2 class="text-lg font-bold text-blue-900"><?= h($store['storeName']) ?></h2>
-        <p class="text-slate-600 text-sm mt-1"><?= h($store['storeAddress']) ?></p>
-        <p class="text-slate-400 text-xs mt-1">☎ <?= h($store['storePhoneNumber']) ?></p>
+       class="card-hover block bg-canvas border border-hairline rounded-card p-6">
+        <div class="text-2xl">🏪</div>
+        <h2 class="text-base font-semibold text-ink mt-3"><?= h($store['storeName']) ?></h2>
+        <p class="text-muted text-sm mt-1"><?= h($store['storeAddress']) ?></p>
+        <p class="text-muted-soft text-xs mt-1">☎ <?= h($store['storePhoneNumber']) ?></p>
     </a>
 <?php endwhile; ?>
 </div>

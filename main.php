@@ -47,49 +47,53 @@ $promotionLabels = [
 $pageTitle = '메인';
 require 'header.php';
 ?>
-<h1 class="text-2xl font-bold text-blue-900">무엇을 도와드릴까요?</h1>
-<p class="text-slate-600 mt-1"><?= h($_SESSION['user_name']) ?>님, CS24에 오신 것을 환영합니다.</p>
+<h1 class="text-[28px] leading-snug font-bold text-ink tracking-tight">무엇을 도와드릴까요?</h1>
+<p class="text-muted mt-2"><?= h($_SESSION['user_name']) ?>님, CS24에 오신 것을 환영합니다.</p>
 
-<div class="grid sm:grid-cols-2 gap-4 mt-8">
-    <a href="fridge.php" class="block bg-white rounded-lg shadow p-8 hover:shadow-md hover:bg-blue-50 transition">
-        <h3 class="text-lg font-bold text-blue-900">🧊 나만의 냉장고</h3>
-        <p class="text-slate-500 text-sm mt-1">구매한 증정품을 안전하게 보관하고 필요할 때 꺼내 드세요.</p>
+<div class="grid sm:grid-cols-2 gap-4 mt-10">
+    <a href="fridge.php" class="card-hover block bg-canvas border border-hairline rounded-card p-6">
+        <div class="text-3xl">🧊</div>
+        <h3 class="text-base font-semibold text-ink mt-3">나만의 냉장고</h3>
+        <p class="text-muted text-sm mt-1 leading-relaxed">구매한 증정품을 안전하게 보관하고 필요할 때 꺼내 드세요.</p>
     </a>
-    <a href="stock.php" class="block bg-white rounded-lg shadow p-8 hover:shadow-md hover:bg-blue-50 transition">
-        <h3 class="text-lg font-bold text-blue-900">🔍 실시간 재고 찾기</h3>
-        <p class="text-slate-500 text-sm mt-1">우리 동네 CS24 매장의 상품 재고를 실시간으로 확인합니다.</p>
+    <a href="stock.php" class="card-hover block bg-canvas border border-hairline rounded-card p-6">
+        <div class="text-3xl">🔍</div>
+        <h3 class="text-base font-semibold text-ink mt-3">실시간 재고 찾기</h3>
+        <p class="text-muted text-sm mt-1 leading-relaxed">우리 동네 CS24 매장의 상품 재고를 실시간으로 확인합니다.</p>
     </a>
-    <a href="orders.php" class="block bg-white rounded-lg shadow p-8 hover:shadow-md hover:bg-blue-50 transition">
-        <h3 class="text-lg font-bold text-blue-900">📦 주문 &amp; 픽업 내역</h3>
-        <p class="text-slate-500 text-sm mt-1">내가 주문한 상품의 픽업 코드와 과거 내역을 조회합니다.</p>
+    <a href="orders.php" class="card-hover block bg-canvas border border-hairline rounded-card p-6">
+        <div class="text-3xl">📦</div>
+        <h3 class="text-base font-semibold text-ink mt-3">주문 &amp; 픽업 내역</h3>
+        <p class="text-muted text-sm mt-1 leading-relaxed">내가 주문한 상품의 픽업 코드와 과거 내역을 조회합니다.</p>
     </a>
-    <a href="stores.php" class="block bg-white rounded-lg shadow p-8 hover:shadow-md hover:bg-blue-50 transition">
-        <h3 class="text-lg font-bold text-blue-900">🧺 주문하기</h3>
-        <p class="text-slate-500 text-sm mt-1">편의점 상품을 원격으로 주문합니다.</p>
+    <a href="stores.php" class="card-hover block bg-canvas border border-hairline rounded-card p-6">
+        <div class="text-3xl">🧺</div>
+        <h3 class="text-base font-semibold text-ink mt-3">주문하기</h3>
+        <p class="text-muted text-sm mt-1 leading-relaxed">편의점 상품을 원격으로 주문합니다.</p>
     </a>
 </div>
 
 <?php if ($storeGroups): ?>
-    <h2 class="text-2xl text-center font-bold text-blue-900 mt-20 mb-6">🔥 특가 세일 상품</h2>
+    <h2 class="text-[22px] font-semibold text-rausch/80 tracking-tight mt-16 mb-6 text-center">🔥 특가 세일 상품</h2>
 
     <div id="promoLayout">
         <?php foreach ($storeGroups as $g): ?>
-            <div class="mb-8">
-                <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
-                    <h3 class="text-lg font-bold text-slate-700"><?= h($g['storeName']) ?></h3>
+            <div class="mb-10">
+                <div class="flex items-center justify-between border-b border-hairline pb-3 mb-4">
+                    <h3 class="text-base font-semibold text-ink"><?= h($g['storeName']) ?></h3>
                     <a href="products.php?storeId=<?= (int)$g['storeId'] ?>"
-                       class="text-sm text-blue-700 hover:underline">더 주문하기</a>
+                       class="text-sm text-ink font-medium underline underline-offset-4 hover:text-rausch">더 주문하기 →</a>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     <?php foreach ($g['products'] as $p): ?>
-                        <div class="bg-white rounded-lg shadow p-4 flex flex-col">
-                            <span class="text-xs bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded w-fit">
+                        <div class="card-hover bg-canvas border border-hairline rounded-card p-4 flex flex-col">
+                            <span class="text-[11px] font-semibold text-ink bg-canvas border border-hairline shadow-sm px-2 py-0.5 rounded-full w-fit">
                                 <?= h($promotionLabels[$p['promotionType']] ?? '행사') ?>
                             </span>
-                            <h4 class="font-bold text-slate-800 mt-2 flex-grow"><?= h($p['productName']) ?></h4>
-                            <p class="text-blue-900 font-bold mt-1"><?= number_format((float)$p['productPrice']) ?>원</p>
+                            <h4 class="font-semibold text-ink mt-3 flex-grow"><?= h($p['productName']) ?></h4>
+                            <p class="text-ink font-medium mt-1"><?= number_format((float)$p['productPrice']) ?>원</p>
                             <button type="button"
-                                    class="promo-add-btn mt-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold py-2 rounded"
+                                    class="promo-add-btn mt-3 h-10 bg-rausch hover:bg-rausch-active text-white text-sm font-medium rounded-lg transition-colors"
                                     data-store-id="<?= (int)$g['storeId'] ?>"
                                     data-product-id="<?= (int)$p['productId'] ?>">
                                 장바구니에 담기
@@ -120,20 +124,21 @@ require 'header.php';
     }
     #cartToast, #crossStoreBanner {
         position: fixed;
-        bottom: 24px;
+        bottom: 32px;
         left: 50%;
         transform: translateX(-50%);
         color: white;
-        padding: 12px 24px;
-        border-radius: 9999px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        padding: 14px 24px;
+        border-radius: 8px;
+        box-shadow: rgba(0,0,0,0.02) 0 0 0 1px, rgba(0,0,0,0.04) 0 2px 6px 0, rgba(0,0,0,0.1) 0 4px 8px 0;
         z-index: 50;
-        font-weight: 600;
+        font-weight: 500;
+        font-size: 14px;
         pointer-events: none;
         animation: cartToast 2.5s ease-out forwards;
     }
-    #cartToast        { background: #10b981; }
-    #crossStoreBanner { background: #ef4444; }
+    #cartToast        { background: #222222; }
+    #crossStoreBanner { background: #c13515; }
     @keyframes cartToast {
         0%   { opacity: 0; transform: translate(-50%, 20px); }
         10%  { opacity: 1; transform: translate(-50%, 0); }

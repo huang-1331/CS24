@@ -222,17 +222,18 @@ foreach ($lines as $line) {
 $pageTitle = '주문 확인';
 require 'header.php';
 ?>
-<h1 class="text-2xl font-bold text-blue-900">주문 확인</h1>
-<p class="text-slate-600 mt-1"><?= h($store['storeName']) ?>에서 픽업 주문</p>
+<div class="max-w-2xl mx-auto">
+<h1 class="text-[22px] font-semibold text-ink tracking-tight">주문 확인</h1>
+<p class="text-muted mt-2"><?= h($store['storeName']) ?>에서 주문</p>
 
 <?php if ($error): ?>
-    <div class="mt-4 bg-red-100 text-red-700 text-sm rounded px-4 py-2"><?= h($error) ?></div>
+    <div class="mt-4 text-error text-sm font-medium"><?= h($error) ?></div>
 <?php endif; ?>
 
 <?php if (!$lines): ?>
-    <div class="bg-white rounded-lg shadow p-8 mt-6 text-center">
-        <p class="text-slate-500">장바구니가 비어 있어 주문할 수 없습니다.</p>
-        <a href="stores.php" class="inline-block mt-4 bg-blue-900 text-white text-sm font-semibold px-4 py-2 rounded">
+    <div class="bg-canvas border border-hairline rounded-card p-10 mt-8 text-center">
+        <p class="text-muted">장바구니가 비어 있어 주문할 수 없습니다.</p>
+        <a href="stores.php" class="inline-flex items-center justify-center h-12 mt-5 px-6 bg-rausch hover:bg-rausch-active text-white text-sm font-medium rounded-lg transition-colors">
             매장 보러 가기
         </a>
     </div>
@@ -241,86 +242,86 @@ require 'header.php';
         <input type="hidden" name="storeId" value="<?= (int)$store['storeId'] ?>">
 
         <!-- 주문 방식 선택 -->
-        <div class="bg-white rounded-lg shadow mt-6 p-5">
-            <p class="font-semibold text-slate-700 mb-3">주문 방식</p>
-            <div class="flex gap-8">
-                <label class="flex items-center gap-2 cursor-pointer">
+        <div class="bg-canvas border border-hairline rounded-card mt-6 p-6">
+            <p class="text-sm font-semibold text-ink mb-4">주문 방식</p>
+            <div class="grid grid-cols-2 gap-3">
+                <label class="flex items-center gap-3 cursor-pointer border border-hairline rounded-lg px-4 py-3 hover:border-ink transition-colors">
                     <input type="radio" name="order_type" value="pickup"
                            <?= (($_POST['order_type'] ?? 'pickup') !== 'delivery') ? 'checked' : '' ?>
-                           class="accent-amber-500">
-                    <span class="text-sm font-medium text-slate-700">📦 픽업 (매장 수령)</span>
+                           class="accent-rausch">
+                    <span class="text-sm font-medium text-ink">📦 픽업 (매장 수령)</span>
                 </label>
-                <label class="flex items-center gap-2 cursor-pointer">
+                <label class="flex items-center gap-3 cursor-pointer border border-hairline rounded-lg px-4 py-3 hover:border-ink transition-colors">
                     <input type="radio" name="order_type" value="delivery"
                            <?= (($_POST['order_type'] ?? '') === 'delivery') ? 'checked' : '' ?>
-                           class="accent-amber-500">
-                    <span class="text-sm font-medium text-slate-700">🛵 배달</span>
+                           class="accent-rausch">
+                    <span class="text-sm font-medium text-ink">🛵 배달</span>
                 </label>
             </div>
         </div>
 
         <!-- 배달 정보 폼 (배달 선택 시 표시) -->
-        <div id="deliveryForm" class="bg-white rounded-lg shadow mt-4 p-5 space-y-3
+        <div id="deliveryForm" class="bg-canvas border border-hairline rounded-card mt-4 p-6 space-y-4
                                       <?= (($_POST['order_type'] ?? '') !== 'delivery') ? 'hidden' : '' ?>">
-            <h3 class="font-semibold text-slate-700">배달 정보</h3>
+            <h3 class="text-base font-semibold text-ink">배달 정보</h3>
             <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-1">받으실 분</label>
+                <label class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">받으실 분</label>
                 <input type="text" name="recipient_name" id="recipientName"
                        value="<?= h($_POST['recipient_name'] ?? $_SESSION['user_name']) ?>"
-                       class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full h-14 border border-hairline rounded-lg px-4 text-ink placeholder-muted-soft">
             </div>
             <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-1">연락처</label>
+                <label class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">연락처</label>
                 <input type="text" name="recipient_phone" id="recipientPhone"
                        value="<?= h($_POST['recipient_phone'] ?? '') ?>"
                        placeholder="010-XXXX-XXXX"
-                       class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full h-14 border border-hairline rounded-lg px-4 text-ink placeholder-muted-soft">
             </div>
             <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-1">주소</label>
+                <label class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">주소</label>
                 <input type="text" name="delivery_addr" id="deliveryAddr"
                        value="<?= h($_POST['delivery_addr'] ?? '') ?>"
                        placeholder="배달 주소를 입력하세요"
-                       class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full h-14 border border-hairline rounded-lg px-4 text-ink placeholder-muted-soft">
             </div>
             <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-1">
-                    상세주소 <span class="text-slate-400 font-normal">(선택)</span>
+                <label class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">
+                    상세주소 <span class="text-muted-soft font-normal normal-case">(선택)</span>
                 </label>
                 <input type="text" name="delivery_detail"
                        value="<?= h($_POST['delivery_detail'] ?? '') ?>"
                        placeholder="동·호수 등"
-                       class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full h-14 border border-hairline rounded-lg px-4 text-ink placeholder-muted-soft">
             </div>
             <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-1">
-                    요청사항 <span class="text-slate-400 font-normal">(선택)</span>
+                <label class="block text-xs font-medium text-muted mb-1.5 uppercase tracking-wide">
+                    요청사항 <span class="text-muted-soft font-normal normal-case">(선택)</span>
                 </label>
                 <input type="text" name="delivery_memo"
                        value="<?= h($_POST['delivery_memo'] ?? '') ?>"
                        placeholder="예: 문 앞에 놓아주세요"
-                       class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full h-14 border border-hairline rounded-lg px-4 text-ink placeholder-muted-soft">
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow mt-6 divide-y">
+        <div class="bg-canvas border border-hairline rounded-card mt-4 divide-y divide-hairline-soft">
             <?php foreach ($lines as $line):
                 $subtotal = $line['cartQuantity'] * $line['productPrice'];
                 $bonus = bonus_quantity($line['promotionType'], (int)$line['cartQuantity']);
             ?>
-            <div class="p-4">
+            <div class="p-5">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="font-semibold text-slate-800"><?= h($line['productName']) ?></p>
-                        <p class="text-sm text-slate-400">
+                        <p class="font-semibold text-ink"><?= h($line['productName']) ?></p>
+                        <p class="text-sm text-muted mt-0.5">
                             <?= number_format((float)$line['productPrice']) ?>원 &times; <?= (int)$line['cartQuantity'] ?>개
                         </p>
                     </div>
-                    <div class="font-bold text-blue-900"><?= number_format($subtotal) ?>원</div>
+                    <div class="font-semibold text-ink"><?= number_format($subtotal) ?>원</div>
                 </div>
                 <?php if ($bonus > 0): ?>
-                    <label class="mt-2 flex items-center gap-2 text-sm text-amber-700 bg-amber-50 rounded px-3 py-2 cursor-pointer">
-                        <input type="checkbox" name="store_bonus[]" value="<?= (int)$line['productId'] ?>">
+                    <label class="mt-3 flex items-center gap-2 text-sm text-ink bg-surface-soft rounded-lg px-3 py-2.5 cursor-pointer">
+                        <input type="checkbox" name="store_bonus[]" value="<?= (int)$line['productId'] ?>" class="accent-rausch">
                         🧊 증정품 <?= $bonus ?>개를 나만의 냉장고에 보관
                     </label>
                 <?php endif; ?>
@@ -328,21 +329,22 @@ require 'header.php';
             <?php endforeach; ?>
         </div>
 
-        <div class="bg-white rounded-lg shadow mt-4 p-5 flex items-center justify-between">
-            <span class="text-lg font-semibold text-slate-700">결제 예정 금액</span>
-            <span class="text-2xl font-bold text-blue-900"><?= number_format($total) ?>원</span>
+        <div class="bg-canvas border border-hairline rounded-card mt-4 p-6 flex items-center justify-between">
+            <span class="text-sm text-muted">결제 예정 금액</span>
+            <span class="text-[22px] font-semibold text-ink tracking-tight"><?= number_format($total) ?>원</span>
         </div>
 
-        <p class="text-xs text-slate-400 mt-2">* 결제는 모의(mock) 처리되며 실제 결제는 발생하지 않습니다.</p>
+        <p class="text-xs text-muted-soft mt-3">* 결제는 모의(mock) 처리되며 실제 결제는 발생하지 않습니다.</p>
 
         <button type="submit"
-                class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-lg mt-4">
+                class="w-full h-12 bg-rausch hover:bg-rausch-active text-white font-medium rounded-lg mt-4 transition-colors">
             주문 확정 &amp; 결제하기
         </button>
     </form>
     <a href="products.php?storeId=<?= (int)$store['storeId'] ?>"
-       class="block text-center text-sm text-slate-500 mt-3 hover:underline">← 상품 보기로 돌아가기</a>
+       class="block text-center text-sm text-muted mt-4 hover:text-ink underline underline-offset-4">← 상품 보기로 돌아가기</a>
 <?php endif; ?>
+</div>
 <script>
 (function () {
     const form      = document.getElementById('deliveryForm');

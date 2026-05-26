@@ -53,72 +53,73 @@ if ($orderId > 0) {
 $pageTitle = $order ? '주문 상세' : '주문 내역';
 require 'header.php';
 ?>
+<div class="max-w-2xl mx-auto">
 <?php if ($orderId > 0): ?>
     <?php if (!$order): ?>
-        <div class="bg-white rounded-lg shadow p-8 text-center">
-            <p class="text-slate-500">주문을 찾을 수 없습니다.</p>
-            <a href="orders.php" class="inline-block mt-4 bg-blue-900 text-white text-sm font-semibold px-4 py-2 rounded">
+        <div class="bg-canvas border border-hairline rounded-card p-10 text-center">
+            <p class="text-muted">주문을 찾을 수 없습니다.</p>
+            <a href="orders.php" class="inline-flex items-center justify-center h-12 mt-5 px-6 bg-rausch hover:bg-rausch-active text-white text-sm font-medium rounded-lg transition-colors">
                 주문 내역으로
             </a>
         </div>
     <?php else: ?>
         <?php if ($isNew): ?>
-            <div class="bg-green-100 text-green-800 rounded-lg px-4 py-3 mb-4">
+            <div class="bg-surface-soft text-ink rounded-lg px-5 py-4 mb-5 text-sm font-medium">
                 <?= $order['orderIsDelivery']
                     ? '✅ 주문이 완료되었습니다. 곧 배송이 시작됩니다.'
                     : '✅ 주문이 완료되었습니다. 아래 픽업 코드를 매장에 보여주세요.' ?>
             </div>
         <?php endif; ?>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-canvas border border-hairline rounded-card p-8">
             <div class="flex items-center justify-between">
-                <h1 class="text-xl font-bold text-blue-900">주문 #<?= (int)$order['orderId'] ?></h1>
-                <span class="text-sm bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded">
+                <h1 class="text-[22px] font-semibold text-ink tracking-tight">주문 #<?= (int)$order['orderId'] ?></h1>
+                <span class="text-xs bg-surface-soft text-ink font-medium px-3 py-1.5 rounded-full">
                     <?= h($statusLabels[$order['orderStatus']] ?? $order['orderStatus']) ?>
                 </span>
             </div>
-            <p class="text-slate-500 text-sm mt-1"><?= h($order['storeName']) ?> &middot; <?= h($order['createdAt']) ?></p>
+            <p class="text-muted text-sm mt-1"><?= h($order['storeName']) ?> &middot; <?= h($order['createdAt']) ?></p>
 
             <?php if ($order['orderIsDelivery']): ?>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4 text-center">
-                    <p class="text-sm text-blue-700">주문 유형</p>
-                    <p class="text-2xl font-bold text-blue-800 mt-1">🛵 배달 주문</p>
+                <div class="bg-surface-soft rounded-card p-8 mt-6 text-center">
+                    <p class="text-xs uppercase tracking-wide text-muted">주문 유형</p>
+                    <p class="text-[32px] font-bold text-ink mt-2 tracking-tight">🛵 배달 주문</p>
                 </div>
             <?php else: ?>
-                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4 text-center">
-                    <p class="text-sm text-amber-700">픽업 코드</p>
-                    <p class="text-3xl font-bold tracking-widest text-amber-800 mt-1">
+                <div class="bg-surface-soft rounded-card p-8 mt-6 text-center">
+                    <p class="text-xs uppercase tracking-wide text-muted">픽업 코드</p>
+                    <p class="text-[64px] font-bold text-ink mt-2 leading-none tracking-[-0.02em]">
                         <?= h($order['orderPickupCode']) ?>
                     </p>
                 </div>
             <?php endif; ?>
 
-            <div class="mt-5 divide-y border-t border-b">
+            <div class="mt-8 divide-y divide-hairline-soft border-t border-b border-hairline">
                 <?php foreach ($details as $d): ?>
-                <div class="py-3 flex items-center justify-between">
+                <div class="py-4 flex items-center justify-between">
                     <div>
-                        <p class="font-semibold text-slate-800"><?= h($d['productName']) ?></p>
-                        <p class="text-sm text-slate-400">
+                        <p class="font-semibold text-ink"><?= h($d['productName']) ?></p>
+                        <p class="text-sm text-muted mt-0.5">
                             <?= number_format((float)$d['orderDetailUnitPrice']) ?>원 &times;
                             <?= (int)$d['orderDetailQuantity'] ?>개
                         </p>
                     </div>
-                    <div class="font-bold text-blue-900"><?= number_format((float)$d['orderDetailSubtotal']) ?>원</div>
+                    <div class="font-semibold text-ink"><?= number_format((float)$d['orderDetailSubtotal']) ?>원</div>
                 </div>
                 <?php endforeach; ?>
             </div>
 
-            <div class="flex items-center justify-between mt-4">
-                <span class="text-lg font-semibold text-slate-700">결제 금액</span>
-                <span class="text-2xl font-bold text-blue-900"><?= number_format((float)$order['orderTotalAmount']) ?>원</span>
+            <div class="flex items-center justify-between mt-6">
+                <span class="text-sm text-muted">결제 금액</span>
+                <span class="text-[22px] font-semibold text-ink tracking-tight"><?= number_format((float)$order['orderTotalAmount']) ?>원</span>
             </div>
         </div>
 
-        <a href="orders.php" class="block text-center text-sm text-slate-500 mt-4 hover:underline">← 전체 주문 내역</a>
+        <a href="orders.php" class="block text-center text-sm text-muted mt-5 hover:text-ink underline underline-offset-4">← 전체 주문 내역</a>
     <?php endif; ?>
 
 <?php else: ?>
-    <h1 class="text-2xl font-bold text-blue-900">주문 내역</h1>
+    <h1 class="text-[22px] font-semibold text-ink tracking-tight">주문 내역</h1>
     <?php
     $stmt = $conn->prepare(
         "SELECT o.orderId, o.orderTotalAmount, o.orderStatus, o.orderPickupCode,
@@ -134,9 +135,9 @@ require 'header.php';
     $stmt->close();
     ?>
     <?php if (!$orders): ?>
-        <div class="bg-white rounded-lg shadow p-8 mt-6 text-center">
-            <p class="text-slate-500">아직 주문 내역이 없습니다.</p>
-            <a href="stores.php" class="inline-block mt-4 bg-blue-900 text-white text-sm font-semibold px-4 py-2 rounded">
+        <div class="bg-canvas border border-hairline rounded-card p-10 mt-6 text-center">
+            <p class="text-muted">아직 주문 내역이 없습니다.</p>
+            <a href="stores.php" class="inline-flex items-center justify-center h-12 mt-5 px-6 bg-rausch hover:bg-rausch-active text-white text-sm font-medium rounded-lg transition-colors">
                 상품 주문하러 가기
             </a>
         </div>
@@ -144,25 +145,26 @@ require 'header.php';
         <div class="space-y-3 mt-6">
             <?php foreach ($orders as $o): ?>
             <a href="orders.php?orderId=<?= (int)$o['orderId'] ?>"
-               class="block bg-white rounded-lg shadow p-4 hover:shadow-md transition">
+               class="card-hover block bg-canvas border border-hairline rounded-card p-5">
                 <div class="flex items-center justify-between">
-                    <span class="font-bold text-blue-900">주문 #<?= (int)$o['orderId'] ?></span>
-                    <span class="text-xs bg-blue-100 text-blue-800 font-semibold px-2 py-1 rounded">
+                    <span class="font-semibold text-ink">주문 #<?= (int)$o['orderId'] ?></span>
+                    <span class="text-xs bg-surface-soft text-ink font-medium px-3 py-1.5 rounded-full">
                         <?= h($statusLabels[$o['orderStatus']] ?? $o['orderStatus']) ?>
                     </span>
                 </div>
-                <p class="text-sm text-slate-500 mt-1"><?= h($o['storeName']) ?> &middot; <?= h($o['createdAt']) ?></p>
-                <div class="flex items-center justify-between mt-2">
+                <p class="text-sm text-muted mt-1"><?= h($o['storeName']) ?> &middot; <?= h($o['createdAt']) ?></p>
+                <div class="flex items-center justify-between mt-3">
                     <?php if ($o['orderIsDelivery']): ?>
-                        <span class="text-sm text-blue-700 font-semibold">🛵 배달</span>
+                        <span class="text-sm text-ink font-medium">🛵 배달</span>
                     <?php else: ?>
-                        <span class="text-sm text-slate-500">픽업코드 <span class="font-semibold tracking-wider text-amber-700"><?= h($o['orderPickupCode']) ?></span></span>
+                        <span class="text-sm text-muted">픽업코드 <span class="font-semibold tracking-wider text-ink ml-1"><?= h($o['orderPickupCode']) ?></span></span>
                     <?php endif; ?>
-                    <span class="font-bold text-blue-900"><?= number_format((float)$o['orderTotalAmount']) ?>원</span>
+                    <span class="font-semibold text-ink"><?= number_format((float)$o['orderTotalAmount']) ?>원</span>
                 </div>
             </a>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
 <?php endif; ?>
+</div>
 <?php require 'footer.php'; ?>
