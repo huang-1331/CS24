@@ -11,17 +11,23 @@ if (isset($_SESSION['user_id'])) {
 $pageTitle = '환영합니다';
 require 'header.php';
 ?>
-<div class="max-w-3xl mx-auto text-center pt-8">
-    <h1 class="text-[28px] leading-snug font-bold text-ink tracking-tight">CS24에 오신 것을 환영합니다</h1>
-    <p class="text-base text-muted mt-3">매장을 선택해 상품을 담고 주문하면 픽업 코드를 받습니다. (로그인 후 이용)</p>
-
-    <div class="mt-10 flex justify-center gap-3">
-        <a href="login.php" class="inline-flex items-center justify-center h-12 px-6 rounded-lg bg-rausch hover:bg-rausch-active text-white font-medium transition-colors">로그인</a>
-        <a href="signup.php" class="inline-flex items-center justify-center h-12 px-6 rounded-lg bg-canvas text-ink border border-ink hover:bg-surface-soft font-medium transition-colors">회원가입</a>
+<!-- Hero 배너: emoji wallpaper + Rausch 계열 gradient -->
+<div class="rounded-card overflow-hidden relative h-72"
+     style="background: linear-gradient(135deg, #fff0f3 0%, #ffe4e9 60%, #ffd9e1 100%);">
+    <div class="absolute inset-0 flex items-center justify-around text-5xl opacity-25 select-none px-6">
+        <span>🥤</span><span>🍙</span><span>🍜</span><span>🧊</span><span>☕</span><span>🍱</span><span>🍫</span><span>🥟</span>
+    </div>
+    <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+        <h1 class="text-[28px] leading-snug font-bold text-ink tracking-tight">CS24에 오신 것을 환영합니다</h1>
+        <p class="text-ink/70 mt-3 font-medium">매장을 선택해 상품을 담고 주문하면 픽업 코드를 받습니다.</p>
+        <div class="mt-6 flex justify-center gap-3">
+            <a href="login.php" class="inline-flex items-center justify-center h-12 px-6 rounded-lg bg-rausch hover:bg-rausch-active text-white font-medium transition-colors">로그인</a>
+            <a href="signup.php" class="inline-flex items-center justify-center h-12 px-6 rounded-lg bg-canvas text-ink border border-ink hover:bg-surface-soft font-medium transition-colors">회원가입</a>
+        </div>
     </div>
 </div>
 
-<div class="grid sm:grid-cols-2 gap-4 mt-16 max-w-4xl mx-auto">
+<div class="grid sm:grid-cols-2 gap-4 mt-10 max-w-4xl mx-auto">
     <a href="login.php" class="card-hover block bg-canvas border border-hairline rounded-card p-6">
         <div class="text-3xl">🧊</div>
         <h3 class="text-base font-semibold text-ink mt-3">나만의 냉장고</h3>

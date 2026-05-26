@@ -18,10 +18,19 @@ $stores = $conn->query(
 $pageTitle = '매장 선택';
 require 'header.php';
 ?>
-<h1 class="text-[22px] font-semibold text-ink tracking-tight">매장 선택</h1>
-<p class="text-muted mt-2">상품을 둘러볼 매장을 선택하세요.</p>
+<!-- Hero 배너: 매장 테마 -->
+<div class="rounded-card overflow-hidden mb-8 relative h-40"
+     style="background: linear-gradient(135deg, #fff0f3 0%, #ffe4e9 60%, #ffd9e1 100%);">
+    <div class="absolute inset-0 flex items-center justify-around text-4xl opacity-25 select-none px-6">
+        <span>🏪</span><span>🛒</span><span>🏬</span><span>🛍️</span><span>🏪</span><span>🛒</span>
+    </div>
+    <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+        <h1 class="text-[22px] font-semibold text-ink tracking-tight">매장 선택</h1>
+        <p class="text-ink/70 mt-1.5 text-sm font-medium">상품을 둘러볼 매장을 선택하세요.</p>
+    </div>
+</div>
 
-<div class="grid sm:grid-cols-2 gap-4 mt-8">
+<div class="grid sm:grid-cols-2 gap-4">
 <?php while ($store = $stores->fetch_assoc()): ?>
     <a href="products.php?storeId=<?= (int)$store['storeId'] ?>"
        class="card-hover block bg-canvas border border-hairline rounded-card p-6">

@@ -45,9 +45,16 @@ if ($keyword !== '') {
 ?>
 
 <div class="max-w-4xl mx-auto">
-    <div class="text-center mb-10">
-        <h1 class="text-[28px] leading-snug font-bold text-ink tracking-tight">실시간 재고 찾기</h1>
-        <p class="text-muted mt-2">원하시는 상품의 이름을 검색하여 각 매장별 실시간 재고를 확인해 보세요.</p>
+    <!-- Hero 배너: 검색 테마 -->
+    <div class="rounded-card overflow-hidden mb-8 relative h-44"
+         style="background: linear-gradient(135deg, #fff0f3 0%, #ffe4e9 60%, #ffd9e1 100%);">
+        <div class="absolute inset-0 flex items-center justify-around text-4xl opacity-25 select-none px-6">
+            <span>🔍</span><span>📦</span><span>🛒</span><span>🏪</span><span>🔍</span><span>📦</span>
+        </div>
+        <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+            <h1 class="text-[28px] leading-snug font-bold text-ink tracking-tight">실시간 재고 찾기</h1>
+            <p class="text-ink/70 mt-2 text-sm font-medium">원하시는 상품의 이름을 검색하여 각 매장별 실시간 재고를 확인해 보세요.</p>
+        </div>
     </div>
 
     <form method="GET" action="stock.php"

@@ -36,8 +36,17 @@ $pageTitle = '나만의 냉장고';
 require 'header.php';
 ?>
 <div class="max-w-3xl mx-auto">
-<h1 class="text-[22px] font-semibold text-ink tracking-tight">🧊 나만의 냉장고</h1>
-<p class="text-muted mt-2">행사 상품 증정품을 보관하고 유효기간 내에 꺼내 사용하세요.</p>
+<!-- Hero 배너: 냉장고 테마 -->
+<div class="rounded-card overflow-hidden mb-8 relative h-40"
+     style="background: linear-gradient(135deg, #fff0f3 0%, #ffe4e9 60%, #ffd9e1 100%);">
+    <div class="absolute inset-0 flex items-center justify-around text-4xl opacity-25 select-none px-6">
+        <span>🧊</span><span>🥤</span><span>🍙</span><span>🍫</span><span>🧊</span><span>☕</span>
+    </div>
+    <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+        <h1 class="text-[22px] font-semibold text-ink tracking-tight">🧊 나만의 냉장고</h1>
+        <p class="text-ink/70 mt-1.5 text-sm font-medium">행사 상품 증정품을 보관하고 유효기간 내에 꺼내 사용하세요.</p>
+    </div>
+</div>
 
 <?php if ($retrieved): ?>
     <div class="mt-5 bg-surface-soft text-ink rounded-lg px-5 py-4 text-sm font-medium">

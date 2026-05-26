@@ -50,7 +50,12 @@ $loggedIn  = isset($_SESSION['user_id']);
     };
     </script>
     <style>
-    html, body { font-family: 'Inter', -apple-system, system-ui, 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #ffffff; color: #222222; }
+    html { background: #ffffff; }
+    body {
+        font-family: 'Inter', -apple-system, system-ui, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        color: #222222;
+        background: linear-gradient(180deg, #fff5f7 0%, #ffffff 520px) no-repeat #ffffff;
+    }
     h1, h2, h3 { color: #222222; letter-spacing: -0.018em; }
     h1 { font-weight: 700; }
     h2, h3 { font-weight: 600; }
@@ -66,7 +71,7 @@ $loggedIn  = isset($_SESSION['user_id']);
     </style>
 </head>
 <body class="bg-canvas min-h-screen flex flex-col">
-<nav class="bg-canvas border-b border-hairline">
+<nav class="border-b border-hairline" style="background: rgba(255,255,255,0.85); backdrop-filter: blur(8px);">
     <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
         <a href="<?= $loggedIn ? 'main.php' : 'index.php' ?>" class="text-2xl font-bold text-rausch tracking-tight">CS24</a>
         <div class="flex items-center gap-6 text-base">

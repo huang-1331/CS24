@@ -47,10 +47,19 @@ $promotionLabels = [
 $pageTitle = '메인';
 require 'header.php';
 ?>
-<h1 class="text-[28px] leading-snug font-bold text-ink tracking-tight">무엇을 도와드릴까요?</h1>
-<p class="text-muted mt-2"><?= h($_SESSION['user_name']) ?>님, CS24에 오신 것을 환영합니다.</p>
+<!-- Hero 배너: emoji wallpaper + Rausch 계열 gradient -->
+<div class="rounded-card overflow-hidden mb-10 relative h-56"
+     style="background: linear-gradient(135deg, #fff0f3 0%, #ffe4e9 60%, #ffd9e1 100%);">
+    <div class="absolute inset-0 flex items-center justify-around text-5xl opacity-25 select-none px-6">
+        <span>🥤</span><span>🍙</span><span>🍜</span><span>🧊</span><span>☕</span><span>🍱</span><span>🍫</span><span>🥟</span>
+    </div>
+    <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+        <h1 class="text-[28px] leading-snug font-bold text-ink tracking-tight">무엇을 도와드릴까요?</h1>
+        <p class="text-ink/70 mt-2 font-medium"><?= h($_SESSION['user_name']) ?>님, CS24에 오신 것을 환영합니다.</p>
+    </div>
+</div>
 
-<div class="grid sm:grid-cols-2 gap-4 mt-10">
+<div class="grid sm:grid-cols-2 gap-4">
     <a href="fridge.php" class="card-hover block bg-canvas border border-hairline rounded-card p-6">
         <div class="text-3xl">🧊</div>
         <h3 class="text-base font-semibold text-ink mt-3">나만의 냉장고</h3>
